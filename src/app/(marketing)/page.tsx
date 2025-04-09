@@ -1,4 +1,3 @@
-"use client";
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +8,13 @@ import {
 } from "@/components/ui/tooltip";
 import { Waitlist } from "@clerk/nextjs";
 import { ChevronRightIcon, InfoIcon, Loader2Icon } from "lucide-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Project to name *",
+  description:
+    "Get ready for a revolutionary app designed to transform issues into ready-to-merge pull requests — saving your team up to 90% of development time.",
+};
 
 export default function Home() {
   return (
