@@ -244,7 +244,10 @@ export default function Layout({ children }: PropsWithChildren) {
     <div className="flex flex-col items-center justify-between min-h-screen relative overflow-hidden">
       <GridBackground />
 
-      <Link href="/" className="fixed top-0 left-0 p-4 items-center flex gap-4">
+      <Link
+        href="/"
+        className="md:fixed z-10 top-0 left-0 p-4 items-center flex gap-4"
+      >
         <Image
           width={64}
           height={64}
@@ -254,7 +257,7 @@ export default function Layout({ children }: PropsWithChildren) {
         />
       </Link>
 
-      <div className="absolute inset-0 top-1/2 overflow-hidden pointer-events-none opacity-75">
+      <div className="absolute inset-0 top-1/2 w-full min-w-4xl overflow-hidden pointer-events-none opacity-75">
         {issues.map(({ style, ...issue }, i) => (
           <div
             key={i}

@@ -62,7 +62,7 @@ export default function Home() {
           fallback={<Loader2Icon className="absolute animate-spin" />}
         />
       </div>
-      <p className="text-sm fixed bottom-0 right-0 p-4 text-muted-foreground">
+      <p className="text-sm md:fixed bottom-0 right-0 p-4 text-muted-foreground bg-gradient-to-t md:bg-none from-transparent via-white to-white">
         <sup>*</sup> We promise we will find a good name, you have some idea?{" "}
         <a target="_blank" href="https://x.com/antho1404" className="link">
           Reach out.
