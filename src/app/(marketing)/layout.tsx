@@ -1,5 +1,6 @@
 import { GitHubIssue } from "@/components/github-issue";
 import { GridBackground } from "@/components/grid-background";
+import { CountdownTimer } from "@/components/countdown-timer";
 import Image from "next/image";
 import Link from "next/link";
 import { PropsWithChildren } from "react";
@@ -243,6 +244,7 @@ export default function Layout({ children }: PropsWithChildren) {
   return (
     <div className="flex flex-col items-center justify-between min-h-screen relative overflow-hidden">
       <GridBackground />
+      <CountdownTimer />
 
       <Link
         href="/"
