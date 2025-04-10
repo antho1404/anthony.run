@@ -1,4 +1,5 @@
 import { AuroraText } from "@/components/magicui/aurora-text";
+import { CountdownTimer } from "@/components/countdown-timer";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -17,6 +18,9 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
+  // Set the launch date to May 1st
+  const launchDate = new Date("2025-05-01T00:00:00");
+  
   return (
     <>
       <Button variant="outline" size="sm" className="rounded-full" asChild>
@@ -30,9 +34,11 @@ export default function Home() {
         </a>
       </Button>
 
-      <h1 className="text-5xl md:text-7xl font-bold mb-8 mt-4">
+      <h1 className="text-5xl md:text-7xl font-bold mb-2 mt-4">
         Project to name<sup>*</sup>
       </h1>
+      
+      <CountdownTimer targetDate={launchDate} />
 
       <p className="text-xl md:text-2xl text-muted-foreground max-w-xl">
         Ever wished you could close these GitHub issues{" "}
