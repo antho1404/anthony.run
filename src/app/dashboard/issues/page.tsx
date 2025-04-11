@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -23,18 +20,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import {
   getAccountRepositoriesByInstallationId,
-  getRepoUrl,
   getAllIssues,
-  GitHubIssue,
+  getRepoUrl,
 } from "@/lib/github";
 import { run } from "@/lib/runner";
 import { cn } from "@/lib/utils";
 import { GitCommitVerticalIcon, PlusCircleIcon } from "lucide-react";
 import { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Project to name * Issues",
@@ -44,7 +40,7 @@ export const metadata: Metadata = {
 export default async function Issues() {
   const repositoriesByInstallation =
     await getAccountRepositoriesByInstallationId();
-    
+
   const issues = await getAllIssues();
 
   async function handleRunPrompt(formData: FormData) {
@@ -74,7 +70,9 @@ export default async function Issues() {
         </CardHeader>
         <CardContent>
           <Table>
-            <TableCaption>A list of all issues from your GitHub repositories.</TableCaption>
+            <TableCaption>
+              A list of all issues from your GitHub repositories.
+            </TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead>Repository</TableHead>
@@ -88,7 +86,8 @@ export default async function Issues() {
               {issues.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-4">
-                    No issues found. Make sure you have connected your GitHub repositories.
+                    No issues found. Make sure you have connected your GitHub
+                    repositories.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -98,9 +97,9 @@ export default async function Issues() {
                       {issue.repository.full_name}
                     </TableCell>
                     <TableCell>
-                      <a 
-                        href={issue.html_url} 
-                        target="_blank" 
+                      <a
+                        href={issue.html_url}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 hover:underline"
                       >
@@ -108,12 +107,14 @@ export default async function Issues() {
                       </a>
                     </TableCell>
                     <TableCell>
-                      <div className={cn(
-                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                        issue.state === "open" 
-                          ? "bg-green-100 text-green-800" 
-                          : "bg-yellow-100 text-yellow-800"
-                      )}>
+                      <div
+                        className={cn(
+                          "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                          issue.state === "open"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        )}
+                      >
                         {issue.state}
                       </div>
                     </TableCell>
@@ -121,27 +122,31 @@ export default async function Issues() {
                       {new Date(issue.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <Button 
+                      <Button
                         size="sm"
                         onClick={() => {
                           // Populate the form with issue details
-                          const form = document.getElementById('run-prompt-form');
+                          const form =
+                            document.getElementById("run-prompt-form");
                           if (form) {
-                            const repoIdSelect = form.querySelector('[name="repoId"]');
-                            const promptTextarea = form.querySelector('[name="prompt"]');
-                            
+                            const repoIdSelect =
+                              form.querySelector('[name="repoId"]');
+                            const promptTextarea =
+                              form.querySelector('[name="prompt"]');
+
                             if (repoIdSelect) {
                               // @ts-ignore - setting value on HTMLSelectElement
-                              repoIdSelect.value = issue.repository.id.toString();
+                              repoIdSelect.value =
+                                issue.repository.id.toString();
                             }
-                            
+
                             if (promptTextarea) {
                               // @ts-ignore - setting value on HTMLTextAreaElement
                               promptTextarea.value = `Fix issue #${issue.number}: ${issue.title}\n\n${issue.body}`;
                             }
-                            
+
                             // Scroll to the form
-                            form.scrollIntoView({ behavior: 'smooth' });
+                            form.scrollIntoView({ behavior: "smooth" });
                           }
                         }}
                       >
@@ -187,14 +192,19 @@ export default async function Issues() {
                                     : "rounded-xs"
                                 )}
                               />{" "}
-                              {"login" in account ? account.login : account.name}
+                              {"login" in account
+                                ? account.login
+                                : account.name}
                             </SelectLabel>
                           ) : (
                             <SelectLabel>n/a</SelectLabel>
                           )}
 
                           {repositories.map((repo) => (
-                            <SelectItem key={repo.id} value={repo.id.toString()}>
+                            <SelectItem
+                              key={repo.id}
+                              value={repo.id.toString()}
+                            >
                               <GitCommitVerticalIcon className="size-3" />
                               {repo.full_name}
                             </SelectItem>
