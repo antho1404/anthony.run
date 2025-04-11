@@ -1,32 +1,36 @@
+import { addInstallation, removeInstallation } from "@/lib/github";
+import { webhooks as webhooksType } from "@octokit/openapi-webhooks-types";
+import { Webhooks } from "@octokit/webhooks";
+import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { saveInstallationId } from "@/lib/github";
 
-// GitHub webhook secret for verifying requests
-const WEBHOOK_SECRET = process.env.GITHUB_WEBHOOK_SECRET;
+type Event<E extends keyof webhooksType> =
+  webhooksType[E]["post"]["requestBody"]["content"]["application/json"];
 
 export async function POST(req: NextRequest) {
-  const payload = await req.json();
-  const signature = req.headers.get("x-hub-signature-256");
-  
-  // In a production app, you would verify the signature here
-  // This would use the WEBHOOK_SECRET to ensure the request is coming from GitHub
-  
-  // Handle different event types
-  const event = req.headers.get("x-github-event");
-  
+  const secret = process.env.WEBHOOK_SECRET;
+  if (!secret)
+    return new Response("Webhook secret not configured", { status: 500 });
+  const webhooks = new Webhooks({ secret });
+
+  const headersPayload = await headers();
+  const signature = headersPayload.get("x-hub-signature-256") || "";
+  const rawBody = await req.text();
+
+  if (!(await webhooks.verify(rawBody, signature)))
+    return new Response("Unauthorized", { status: 401 });
+
+  const event = headersPayload.get("x-github-event");
+
   if (event === "installation") {
-    // Handle installation events
-    if (payload.action === "created" || payload.action === "added") {
-      const installationId = payload.installation.id;
-      const accountId = payload.installation.account.id;
-      const accountLogin = payload.installation.account.login;
-      
-      console.log(`GitHub App installed by ${accountLogin} (ID: ${accountId}) with installation ID ${installationId}`);
-      
-      // Here, you would typically associate the installation with the user in your database
-      // For now, we'll just log it
-    }
+    const payload = JSON.parse(rawBody) as Event<
+      "installation-created" | "installation-deleted"
+    >;
+    if (payload.action === "created")
+      await addInstallation(payload.sender.id, payload.installation.id);
+    if (payload.action === "deleted")
+      await removeInstallation(payload.sender.id, payload.installation.id);
   }
-  
+
   return NextResponse.json({ success: true });
 }

@@ -1,92 +1,92 @@
-import { createClerkClient, currentUser } from "@clerk/nextjs/server";
+import { clerkClient } from "@/lib/clerk";
+import { currentUser } from "@clerk/nextjs/server";
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/core";
 import { readFileSync } from "fs";
 
-export async function generateToken() {
-  const user = await currentUser();
+const appAuth = createAppAuth({
+  appId: Number(process.env.GITHUB_APP_ID!),
+  privateKey: readFileSync("./private-key.pem", "utf8"),
+});
 
-  if (!user) throw new Error("User not authenticated");
-
-  console.log(user.externalAccounts);
-  const githubUserId = user.externalAccounts.find(
-    (account) => account.provider === "oauth_github"
-  )?.externalId;
-
-  if (!githubUserId) throw new Error("GitHub account not connected");
-
-  const appId = process.env.GITHUB_APP_ID;
-  const privateKey = readFileSync("./private-key.pem", "utf8");
-
-  if (!appId || !privateKey) {
-    throw new Error("GitHub App credentials not configured");
-  }
-
-  const auth = createAppAuth({
-    appId,
-    privateKey,
+async function findUserByGithubId(githubUserId: string | number) {
+  const users = await clerkClient.users.getUserList({
+    externalId: [githubUserId.toString()],
+    limit: 1,
   });
-
-  const { token } = await auth({ type: "app" });
-
-  const octokit = new Octokit({ auth: token });
-
-  const { data: installations } = await octokit.request(
-    "GET /app/installations"
-  );
-
-  // const response = await octokit.request('POST /app/installations/{installation_id}/access_tokens', {
-  //   installation_id: installationId,
-  //   headers: {
-  //     'X-GitHub-Api-Version': '2022-11-28',
-  //   },
-  // });
-  const userInstallation = installations.find(
-    (installation) => installation.account?.id.toString() === githubUserId
-  );
-
-  if (!userInstallation)
-    throw new Error("GitHub App not installed for this user");
-
-  const installationAuthentication = await auth({
-    type: "installation",
-    installationId: userInstallation.id,
-  });
-
-  return installationAuthentication.token;
+  return users.data.length > 0 ? users.data[0] : null;
 }
 
-export async function getInstallationId(): Promise<string | null> {
-  const user = await currentUser();
-  const githubInstallationId = user?.privateMetadata.githubInstallationId as
-    | string
-    | undefined;
-  return githubInstallationId ?? null;
+async function getInstallationToken(installationId: number) {
+  return (await appAuth({ type: "installation", installationId })).token;
 }
 
-// Save GitHub installation ID to user metadata
-export async function saveInstallationId(
-  installationId: string
+export async function addInstallation(
+  githubUserId: number,
+  installationId: number
 ): Promise<void> {
-  const user = await currentUser();
-  if (!user) throw new Error("User not authenticated");
-  const client = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
-  await client.users.updateUserMetadata(user.id, {
+  const user = await findUserByGithubId(githubUserId);
+  if (!user) return;
+  await clerkClient.users.updateUserMetadata(user.id, {
     privateMetadata: {
-      githubInstallationId: installationId,
+      githubInstallationIds: [
+        ...(user.privateMetadata.githubInstallationIds ?? []),
+        installationId,
+      ].filter((value, index, self) => self.indexOf(value) === index),
     },
   });
 }
 
-export async function getUserRepositories() {
-  const token = await generateToken();
-  const octokit = new Octokit({ auth: token });
-
-  const response = await octokit.request("GET /installation/repositories", {
-    headers: {
-      "X-GitHub-Api-Version": "2022-11-28",
+export async function removeInstallation(
+  githubUserId: number,
+  installationId: number
+): Promise<void> {
+  const user = await findUserByGithubId(githubUserId);
+  if (!user) return;
+  await clerkClient.users.updateUserMetadata(user.id, {
+    privateMetadata: {
+      githubInstallationIds: (
+        user.privateMetadata.githubInstallationIds ?? []
+      ).filter((id) => id !== installationId),
     },
   });
+}
 
-  return response.data.repositories;
+export async function getAccountRepositoriesByInstallationId() {
+  const user = await currentUser();
+  const { token } = await appAuth({ type: "app" });
+  const app = new Octokit({ auth: token });
+  return await Promise.all(
+    (user?.privateMetadata.githubInstallationIds || []).map(
+      async (installationId) => {
+        const token = await getInstallationToken(installationId);
+        const user = new Octokit({ auth: token });
+        const response = await user.request("GET /installation/repositories");
+        const installation = await app.request(
+          "GET /app/installations/{installation_id}",
+          { installation_id: installationId }
+        );
+        return {
+          installationId,
+          account: installation.data.account,
+          repositories: response.data.repositories,
+        };
+      }
+    )
+  );
+}
+
+export async function getRepoUrl(repoId: number) {
+  const items = await getAccountRepositoriesByInstallationId();
+  const item = items.find(({ repositories }) =>
+    repositories.find((repo) => repo.id === repoId)
+  );
+  if (!item) return null;
+  const repo = item.repositories.find((repo) => repo.id === repoId);
+  if (!repo) return null;
+  const url = new URL(repo.url);
+  if (!repo.private) return url;
+  url.username = "x-access-token";
+  url.password = await getInstallationToken(item.installationId);
+  return url;
 }

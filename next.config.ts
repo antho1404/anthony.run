@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   experimental: {
     typedEnv: true,
   },
+  images: {
+    remotePatterns: [
+      { hostname: "avatars.githubusercontent.com", pathname: "/u/*" },
+    ],
+  },
 };
 
 export default nextConfig;
