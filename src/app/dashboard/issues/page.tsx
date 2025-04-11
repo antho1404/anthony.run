@@ -101,7 +101,9 @@ export default async function Issues() {
               </Select>
               <Button variant="outline" asChild>
                 <a
-                  href="https://github.com/apps/project-to-name/installations/select_target"
+                  href={`https://github.com/apps/${
+                    process.env.GITHUB_APP_NAME || ""
+                  }/installations/select_target`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

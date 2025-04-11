@@ -20,7 +20,9 @@ export default async function Dashboard() {
       icon: GithubIcon,
       title: "Connect GitHub",
       description: "Link your repositories",
-      link: "https://github.com/apps/project-to-name/installations/select_target",
+      link: `https://github.com/apps/${
+        process.env.GITHUB_APP_NAME || ""
+      }/installations/select_target`,
     },
     {
       icon: CircleAlertIcon,
