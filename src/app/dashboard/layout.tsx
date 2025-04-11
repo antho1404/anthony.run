@@ -23,6 +23,7 @@ import {
   SettingsIcon,
 } from "lucide-react";
 import { PropsWithChildren } from "react";
+import Link from "next/link";
 
 export default function Dashboard({ children }: PropsWithChildren) {
   return (
@@ -36,21 +37,27 @@ export default function Dashboard({ children }: PropsWithChildren) {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <HomeIcon />
-                    Home
+                  <SidebarMenuButton asChild>
+                    <Link href="/dashboard">
+                      <HomeIcon />
+                      Home
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <CircleAlertIcon />
-                    Issues
+                  <SidebarMenuButton asChild>
+                    <Link href="/dashboard/issues">
+                      <CircleAlertIcon />
+                      Issues
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <HistoryIcon />
-                    History
+                  <SidebarMenuButton asChild>
+                    <Link href="/dashboard/history">
+                      <HistoryIcon />
+                      History
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
