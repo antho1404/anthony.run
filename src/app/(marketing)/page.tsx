@@ -1,5 +1,6 @@
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { Button } from "@/components/ui/button";
+import { GitHubIssue } from "@/components/github-issue";
 import {
   Tooltip,
   TooltipContent,
@@ -57,7 +58,39 @@ export default function Home() {
         — saving your team up to 90% of development time.
       </p>
 
-      <div className="min-h-80 flex items-center justify-center w-full max-w-96 mt-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-12 mb-8 w-full max-w-3xl">
+        <GitHubIssue
+          number={42}
+          title="Fix responsive layout on mobile devices"
+          label="bug"
+          comments={3}
+          createdAt="2 days ago"
+        />
+        <GitHubIssue
+          number={57}
+          title="Implement authentication flow"
+          label="feature"
+          comments={8}
+          createdAt="1 week ago"
+        />
+        <GitHubIssue
+          number={64}
+          title="Improve accessibility for screen readers"
+          label="accessibility"
+          isOpen={false}
+          comments={5}
+          createdAt="3 days ago"
+        />
+        <GitHubIssue
+          number={78}
+          title="Optimize database queries for better performance"
+          label="performance"
+          comments={2}
+          createdAt="12 hours ago"
+        />
+      </div>
+      
+      <div className="min-h-80 flex items-center justify-center w-full max-w-96 mt-8">
         <Waitlist
           fallback={<Loader2Icon className="absolute animate-spin" />}
         />
