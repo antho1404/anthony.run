@@ -11,7 +11,7 @@ import { ChevronRightIcon, InfoIcon, Loader2Icon } from "lucide-react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Project to name *",
+  title: "Anthony.run",
   description:
     "Get ready for a revolutionary app designed to transform issues into ready-to-merge pull requests — saving your team up to 90% of development time.",
 };
@@ -30,8 +30,8 @@ export default function Home() {
         </a>
       </Button>
 
-      <h1 className="text-5xl md:text-7xl font-bold mb-8 mt-4">
-        Project to name<sup>*</sup>
+      <h1 className="text-5xl md:text-7xl font-bold mb-8 mt-4 flex items-center gap-3">
+        anthony • <AuroraText>run</AuroraText>
       </h1>
 
       <p className="text-xl md:text-2xl text-muted-foreground max-w-xl">
