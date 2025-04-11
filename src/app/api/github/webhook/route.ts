@@ -8,7 +8,7 @@ type Event<E extends keyof webhooksType> =
   webhooksType[E]["post"]["requestBody"]["content"]["application/json"];
 
 export async function POST(req: NextRequest) {
-  const secret = process.env.WEBHOOK_SECRET;
+  const secret = process.env.GITHUB_WEBHOOK_SECRET;
   if (!secret)
     return new Response("Webhook secret not configured", { status: 500 });
   const webhooks = new Webhooks({ secret });

@@ -2,11 +2,14 @@ import { clerkClient } from "@/lib/clerk";
 import { currentUser } from "@clerk/nextjs/server";
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/core";
-import { readFileSync } from "fs";
 
+const privateKey = Buffer.from(
+  process.env.GITHUB_PRIVATE_KEY_B64 || "",
+  "base64"
+).toString("utf-8");
 const appAuth = createAppAuth({
   appId: Number(process.env.GITHUB_APP_ID!),
-  privateKey: readFileSync("./private-key.pem", "utf8"),
+  privateKey: privateKey,
 });
 
 async function findUserByGithubId(githubUserId: string | number) {
