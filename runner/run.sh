@@ -21,8 +21,8 @@ claude --print --json "$PROMPT. Add all files and commit everything relevant" --
 # claude --print --json "$PROMPT"
 echo '{"result": "'"$PROMPT"'"}'
 
-git add .
-git commit -m "temp"
+# git add .
+# git commit -m "temp"
 git push origin "$BRANCH"
 
 # Cleanup
