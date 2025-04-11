@@ -84,7 +84,7 @@ export async function getRepoUrl(repoId: number) {
   if (!item) return null;
   const repo = item.repositories.find((repo) => repo.id === repoId);
   if (!repo) return null;
-  const url = new URL(repo.url);
+  const url = new URL(repo.html_url);
   if (!repo.private) return url;
   url.username = "x-access-token";
   url.password = await getInstallationToken(item.installationId);

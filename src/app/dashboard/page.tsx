@@ -1,26 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  getAccountRepositoriesByInstallationId,
-  getRepoUrl,
-} from "@/lib/github";
-import { run } from "@/lib/runner";
-import { cn } from "@/lib/utils";
-import { GitCommitVerticalIcon, PlusCircleIcon } from "lucide-react";
+  CircleAlertIcon,
+  GithubIcon,
+  HistoryIcon,
+  SlidersIcon,
+} from "lucide-react";
 import { Metadata } from "next";
-import Image from "next/image";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Project to name * Dashboard",
@@ -29,125 +15,56 @@ export const metadata: Metadata = {
 };
 
 export default async function Dashboard() {
-  const repositoriesByInstallation =
-    await getAccountRepositoriesByInstallationId();
-
-  async function handleRunPrompt(formData: FormData) {
-    "use server";
-    const repoId = formData.get("repoId");
-    const prompt = formData.get("prompt");
-    const branch = formData.get("branch");
-    if (!repoId) throw new Error("Invalid repo ID");
-    if (!prompt) throw new Error("Invalid prompt");
-    if (!branch) throw new Error("Invalid branch");
-
-    const repoUrl = await getRepoUrl(Number(repoId));
-    if (!repoUrl) throw new Error("Invalid repo URL");
-
-    await run({
-      repoUrl: repoUrl,
-      prompt: prompt.toString(),
-      branch: branch.toString(),
-    });
-  }
+  const links = [
+    {
+      icon: GithubIcon,
+      title: "Connect GitHub",
+      description: "Link your repositories",
+      link: "https://github.com/apps/project-to-name/installations/select_target",
+    },
+    {
+      icon: CircleAlertIcon,
+      title: "Solve an Issue",
+      description: "Fix problems in your projects",
+      link: "/dashboard/issues",
+    },
+    {
+      icon: HistoryIcon,
+      title: "History",
+      description: "View your past activities",
+      link: "/dashboard/history",
+    },
+    {
+      icon: SlidersIcon,
+      title: "Customize",
+      description: "Personalize your dashboard",
+      link: "/dashboard/settings",
+    },
+  ];
 
   return (
-    <div className="container mx-auto py-8 px-4 space-y-6">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Run Prompt on Repository</CardTitle>
-        </CardHeader>
-        <form action={handleRunPrompt}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="repoId">Repository</Label>
-              <div className="flex gap-2">
-                <Select name="repoId">
-                  <SelectTrigger id="repoId" className="w-full">
-                    <SelectValue placeholder="Select a repository" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {repositoriesByInstallation.map(
-                      ({ account, repositories }, i) => (
-                        <SelectGroup key={i}>
-                          {account ? (
-                            <SelectLabel className="flex items-center gap-2">
-                              <Image
-                                src={account.avatar_url}
-                                alt={account.id.toString()}
-                                width={24}
-                                height={24}
-                                className={cn(
-                                  "size-4",
-                                  "type" in account && account.type === "User"
-                                    ? "rounded-full"
-                                    : "rounded-xs"
-                                )}
-                              />{" "}
-                              {"login" in account
-                                ? account.login
-                                : account.name}
-                            </SelectLabel>
-                          ) : (
-                            <SelectLabel>n/a</SelectLabel>
-                          )}
-
-                          {repositories.map((repo) => (
-                            <SelectItem
-                              key={repo.id}
-                              value={repo.id.toString()}
-                            >
-                              <GitCommitVerticalIcon className="size-3" />
-                              {repo.full_name}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      )
-                    )}
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" asChild>
-                  <a
-                    href="https://github.com/apps/project-to-name/installations/select_target"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <PlusCircleIcon className="size-4" />
-                    Add GitHub account
-                  </a>
-                </Button>
+    <div className="w-full max-w-2xl mx-auto md:mt-20 space-y-6">
+      <h1 className="peer- text-2xl font-bold">Get Started</h1>
+      <div className="flex flex-col space-y-4">
+        {links.map((link, i) => (
+          <Button
+            variant="outline"
+            className="justify-start gap-3 h-auto p-3 group"
+            key={i}
+            asChild
+          >
+            <Link href={link.link}>
+              <link.icon className="size-4" />
+              <div className="flex flex-col items-start">
+                <span>{link.title}</span>
+                <span className="text-xs text-muted-foreground">
+                  {link.description}
+                </span>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="branch">Branch</Label>
-              <Input
-                type="text"
-                id="branch"
-                name="branch"
-                placeholder="main"
-                defaultValue="feature/countdown"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="prompt">Prompt</Label>
-              <Textarea
-                id="prompt"
-                name="prompt"
-                rows={5}
-                placeholder="Enter your prompt..."
-                defaultValue="Add a countdown to end in May 1st to announce the official launch. In terms of design make it with really large characters and in opacity in the background on the top of the screen, make it bold and make it in a way that it's not too intrusive but still visible."
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              Run Prompt
-            </Button>
-          </CardContent>
-        </form>
-      </Card>
+            </Link>
+          </Button>
+        ))}
+      </div>
     </div>
   );
 }
