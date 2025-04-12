@@ -67,7 +67,8 @@ export default async function History() {
                   </TableCell>
                 </TableRow>
               ) : (
-                executions.map((execution) => (
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                executions.map((execution: any) => (
                   <TableRow key={execution.machineId}>
                     <TableCell className="font-medium flex items-center gap-1">
                       <CodeIcon className="size-4" />
