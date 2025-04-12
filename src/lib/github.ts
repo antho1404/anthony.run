@@ -115,37 +115,39 @@ export type GitHubIssue = {
 
 export async function getAllIssues(): Promise<GitHubIssue[]> {
   const installations = await getAccountRepositoriesByInstallationId();
-  
+
   const allIssues: GitHubIssue[] = [];
-  
+
   for (const { installationId, repositories } of installations) {
     const token = await getInstallationToken(installationId);
     const octokit = new Octokit({ auth: token });
-    
+
     for (const repo of repositories) {
       try {
-        const response = await octokit.request('GET /repos/{owner}/{repo}/issues', {
-          owner: repo.owner.login,
-          repo: repo.name,
-          state: 'open',
-          per_page: 100,
-        });
-        
+        const response = await octokit.request(
+          "GET /repos/{owner}/{repo}/issues",
+          {
+            owner: repo.owner.login,
+            repo: repo.name,
+            state: "open",
+            per_page: 100,
+          }
+        );
+
         // Add repository information to each issue
-        const issues = response.data.map(issue => ({
+        const issues = response.data.map((issue) => ({
           ...issue,
           repository: {
             id: repo.id,
             full_name: repo.full_name,
-          }
+          },
         })) as GitHubIssue[];
-        
+
         allIssues.push(...issues);
       } catch (error) {
         console.error(`Error fetching issues for ${repo.full_name}:`, error);
       }
     }
   }
-  
   return allIssues;
 }

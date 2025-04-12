@@ -122,36 +122,7 @@ export default async function Issues() {
                       {new Date(issue.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          // Populate the form with issue details
-                          const form =
-                            document.getElementById("run-prompt-form");
-                          if (form) {
-                            const repoIdSelect =
-                              form.querySelector('[name="repoId"]');
-                            const promptTextarea =
-                              form.querySelector('[name="prompt"]');
-
-                            if (repoIdSelect) {
-                              // @ts-ignore - setting value on HTMLSelectElement
-                              repoIdSelect.value =
-                                issue.repository.id.toString();
-                            }
-
-                            if (promptTextarea) {
-                              // @ts-ignore - setting value on HTMLTextAreaElement
-                              promptTextarea.value = `Fix issue #${issue.number}: ${issue.title}\n\n${issue.body}`;
-                            }
-
-                            // Scroll to the form
-                            form.scrollIntoView({ behavior: "smooth" });
-                          }
-                        }}
-                      >
-                        Solve
-                      </Button>
+                      <Button size="sm">Create Pull Request</Button>
                     </TableCell>
                   </TableRow>
                 ))
