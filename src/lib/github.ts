@@ -93,3 +93,63 @@ export async function getRepoUrl(repoId: number) {
   url.password = await getInstallationToken(item.installationId);
   return url;
 }
+
+export async function getRepositoryIssues(repoId: number) {
+  const items = await getAccountRepositoriesByInstallationId();
+  const item = items.find(({ repositories }) =>
+    repositories.find((repo) => repo.id === repoId)
+  );
+  if (!item) return null;
+  const repo = item.repositories.find((repo) => repo.id === repoId);
+  if (!repo) return null;
+  
+  const token = await getInstallationToken(item.installationId);
+  const octokit = new Octokit({ auth: token });
+  
+  const response = await octokit.request('GET /repos/{owner}/{repo}/issues', {
+    owner: repo.owner.login,
+    repo: repo.name,
+    state: 'open',
+    sort: 'updated',
+    per_page: 100
+  });
+  
+  return {
+    repoName: repo.full_name,
+    repoUrl: repo.html_url,
+    issues: response.data
+  };
+}
+
+export async function getIssueDetails(repoId: number, issueNumber: number) {
+  const items = await getAccountRepositoriesByInstallationId();
+  const item = items.find(({ repositories }) =>
+    repositories.find((repo) => repo.id === repoId)
+  );
+  if (!item) return null;
+  const repo = item.repositories.find((repo) => repo.id === repoId);
+  if (!repo) return null;
+  
+  const token = await getInstallationToken(item.installationId);
+  const octokit = new Octokit({ auth: token });
+  
+  const issueResponse = await octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}', {
+    owner: repo.owner.login,
+    repo: repo.name,
+    issue_number: issueNumber
+  });
+
+  const commentsResponse = await octokit.request('GET /repos/{owner}/{repo}/issues/{issue_number}/comments', {
+    owner: repo.owner.login,
+    repo: repo.name,
+    issue_number: issueNumber
+  });
+  
+  return {
+    issue: issueResponse.data,
+    comments: commentsResponse.data,
+    repoFullName: repo.full_name,
+    repoOwner: repo.owner.login,
+    repoName: repo.name
+  };
+}
