@@ -134,14 +134,16 @@ export async function getAllIssues(): Promise<GitHubIssue[]> {
           }
         );
 
-        // Add repository information to each issue
-        const issues = response.data.map((issue) => ({
-          ...issue,
-          repository: {
-            id: repo.id,
-            full_name: repo.full_name,
-          },
-        })) as GitHubIssue[];
+        // Add repository information to each issue and filter out pull requests
+        const issues = response.data
+          .filter((issue) => !issue.pull_request)
+          .map((issue) => ({
+            ...issue,
+            repository: {
+              id: repo.id,
+              full_name: repo.full_name,
+            },
+          })) as GitHubIssue[];
 
         allIssues.push(...issues);
       } catch (error) {
