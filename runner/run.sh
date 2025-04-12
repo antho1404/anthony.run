@@ -19,6 +19,13 @@ cd "$TMP_DIR"
 echo "Checking out branch..."
 git checkout -b "$BRANCH"
 
+# Check for CLAUDE.md instructions file
+if [ -f "CLAUDE.md" ]; then
+  echo "Found CLAUDE.md instructions file"
+  CLAUDE_INSTRUCTIONS=$(cat CLAUDE.md)
+  PROMPT="$CLAUDE_INSTRUCTIONS\n\n$PROMPT"
+fi
+
 echo "Running Claude..."
 claude --print --json "$PROMPT. Add all files and commit everything relevant" --allowedTools "Bash(git commit:*),Bash(git add:*),Edit,Write"
 # allowedTools "Bash(git diff:*),Bash(git status:*),Bash(git log:*),Bash(git show:*),Bash(git blame:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Edit,Write"
