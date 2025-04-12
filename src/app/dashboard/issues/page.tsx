@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/select";
 import {
   getAccountRepositoriesByInstallationId,
-  getRepositoryIssues,
   getIssueDetails,
+  getRepositoryIssues,
   getRepoUrl,
 } from "@/lib/github";
 import { run } from "@/lib/runner";
@@ -31,17 +31,19 @@ export const metadata: Metadata = {
 export default async function Issues({
   searchParams,
 }: {
-  searchParams: { repoId?: string };
+  searchParams: Promise<{ repoId?: string }>;
 }) {
-  const repositoriesByInstallation = await getAccountRepositoriesByInstallationId();
-  const repoId = searchParams.repoId ? parseInt(searchParams.repoId) : undefined;
+  const repositoriesByInstallation =
+    await getAccountRepositoriesByInstallationId();
+  const params = await searchParams;
+  const repoId = params.repoId ? parseInt(params.repoId) : undefined;
   const issuesData = repoId ? await getRepositoryIssues(repoId) : null;
 
   async function handleSelectRepo(formData: FormData) {
     "use server";
     const repoId = formData.get("repoId");
     if (!repoId) throw new Error("Invalid repo ID");
-    
+
     redirect(`/dashboard/issues?repoId=${repoId}`);
   }
 
@@ -52,7 +54,10 @@ export default async function Issues({
     if (!repoId) throw new Error("Invalid repo ID");
     if (!issueNumber) throw new Error("Invalid issue number");
 
-    const issueDetails = await getIssueDetails(Number(repoId), Number(issueNumber));
+    const issueDetails = await getIssueDetails(
+      Number(repoId),
+      Number(issueNumber)
+    );
     if (!issueDetails) throw new Error("Could not fetch issue details");
 
     const repoUrl = await getRepoUrl(Number(repoId));
@@ -148,6 +153,7 @@ export default async function Issues({
               Issues from {issuesData.repoName}
             </h3>
             <div className="grid gap-3">
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {issuesData.issues.map((issue: any) => (
                 <form key={issue.id} action={handleRunIssue}>
                   <input
@@ -188,9 +194,11 @@ export default async function Issues({
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getIssueLabel(issue: any): any {
   if (issue.labels && issue.labels.length > 0) {
     // Try to map GitHub labels to our predefined labels
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const labelMap: Record<string, any> = {
       bug: "bug",
       documentation: "documentation",
@@ -203,18 +211,18 @@ function getIssueLabel(issue: any): any {
       wontfix: "wontfix",
       dependencies: "dependencies",
     };
-    
+
     for (const label of issue.labels) {
       const name = label.name.toLowerCase();
       if (labelMap[name]) {
         return labelMap[name];
       }
     }
-    
+
     // If there's a label but no match, use the first one
     return "feature";
   }
-  
+
   // Default label if none found
   return "feature";
 }
@@ -223,7 +231,7 @@ function formatCreatedAt(createdAt: string): string {
   const date = new Date(createdAt);
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  
+
   if (diffInSeconds < 60) {
     return "just now";
   } else if (diffInSeconds < 3600) {
@@ -244,33 +252,36 @@ function formatCreatedAt(createdAt: string): string {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generatePromptFromIssue(issueDetails: any): string {
   const { issue, comments, repoFullName, repoOwner, repoName } = issueDetails;
-  
+
   let prompt = `# GitHub Issue: ${issue.title}\n\n`;
   prompt += `Issue #${issue.number} from ${repoFullName}\n\n`;
-  
+
   // Extract key information from the issue body
   const issueBody = issue.body || "";
   prompt += `## Issue Description\n\n${issueBody}\n\n`;
-  
+
   // Add relevant labels as context
   if (issue.labels && issue.labels.length > 0) {
     prompt += `## Labels\n`;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     issue.labels.forEach((label: any) => {
       prompt += `- ${label.name}\n`;
     });
     prompt += `\n`;
   }
-  
+
   // Add comments if any, focusing on technical details
   if (comments.length > 0) {
     prompt += `## Discussion Context\n\n`;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     comments.forEach((comment: any) => {
       prompt += `**@${comment.user.login}:**\n${comment.body}\n\n`;
     });
   }
-  
+
   // Add specific instructions for the AI
   prompt += `\n## Task\n\n`;
   prompt += `Please solve this issue by implementing the necessary changes to the codebase. Follow these guidelines:\n\n`;
@@ -279,67 +290,94 @@ function generatePromptFromIssue(issueDetails: any): string {
   prompt += `3. **Implement a solution:** Make the minimal necessary changes to address the issue\n`;
   prompt += `4. **Follow best practices:** Ensure your code is clean, maintainable, and consistent with the project style\n`;
   prompt += `5. **Add tests if appropriate:** Cover your changes with tests when applicable\n`;
-  
+
   // Add repository context
   prompt += `\n## Repository Context\n`;
   prompt += `- Owner: ${repoOwner}\n`;
   prompt += `- Repository: ${repoName}\n`;
   prompt += `- Issue URL: https://github.com/${repoFullName}/issues/${issue.number}\n\n`;
-  
+
   // Add technical hints and focus areas based on issue content
   const keywords = extractKeywords(issueBody);
   if (keywords.length > 0) {
     prompt += `## Focus Areas\n`;
     prompt += `Based on the issue content, pay special attention to these aspects:\n`;
-    keywords.forEach(keyword => {
+    keywords.forEach((keyword) => {
       prompt += `- ${keyword}\n`;
     });
     prompt += `\n`;
   }
-  
+
   prompt += `Please provide a detailed solution that addresses all aspects of this issue. Thank you!`;
-  
+
   return prompt;
 }
 
 function extractKeywords(text: string): string[] {
   if (!text) return [];
-  
+
   // List of technical terms to look for in issues
   const technicalPatterns = [
     // UI/Frontend patterns
-    /component/i, /UI/i, /interface/i, /display/i, /render/i, /style/i, /CSS/i, 
-    /responsive/i, /animation/i, /layout/i, /theme/i, /accessibility/i, /a11y/i,
-    
+    /component/i,
+    /UI/i,
+    /interface/i,
+    /display/i,
+    /render/i,
+    /style/i,
+    /CSS/i,
+    /responsive/i,
+    /animation/i,
+    /layout/i,
+    /theme/i,
+    /accessibility/i,
+    /a11y/i,
+
     // Backend/data patterns
-    /API/i, /endpoint/i, /database/i, /performance/i, /query/i, /cache/i,
-    /auth[entication|orization]/i, /security/i, /data/i, /validation/i,
-    
+    /API/i,
+    /endpoint/i,
+    /database/i,
+    /performance/i,
+    /query/i,
+    /cache/i,
+    /auth[entication|orization]/i,
+    /security/i,
+    /data/i,
+    /validation/i,
+
     // General development terms
-    /bug/i, /feature/i, /implement/i, /fix/i, /error/i, /exception/i,
-    /test/i, /documentation/i, /refactor/i, /optimize/i
+    /bug/i,
+    /feature/i,
+    /implement/i,
+    /fix/i,
+    /error/i,
+    /exception/i,
+    /test/i,
+    /documentation/i,
+    /refactor/i,
+    /optimize/i,
   ];
-  
+
   // Extract keywords based on patterns
   const keywords = new Set<string>();
-  
-  technicalPatterns.forEach(pattern => {
+
+  technicalPatterns.forEach((pattern) => {
     const match = text.match(pattern);
     if (match && match[0]) {
       keywords.add(match[0]);
     }
   });
-  
+
   // Also look for code fragments or technical terms wrapped in backticks
   const codeFragments = text.match(/`([^`]+)`/g);
   if (codeFragments) {
-    codeFragments.forEach(fragment => {
-      const cleaned = fragment.replace(/`/g, '').trim();
+    codeFragments.forEach((fragment) => {
+      const cleaned = fragment.replace(/`/g, "").trim();
       if (cleaned.length > 0) {
         keywords.add(cleaned);
       }
     });
   }
-  
+
   return Array.from(keywords);
 }
