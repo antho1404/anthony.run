@@ -121,7 +121,7 @@ export default async function Issues({
 
                         {repositories.map((repo) => (
                           <SelectItem key={repo.id} value={repo.id.toString()}>
-                            <GitCommitVerticalIcon className="size-3 mr-2" />
+                            <GitCommitVerticalIcon className="size-3" />
                             {repo.full_name}
                           </SelectItem>
                         ))}
@@ -139,7 +139,7 @@ export default async function Issues({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <PlusCircleIcon className="size-4 mr-2" />
+                  <PlusCircleIcon className="size-4" />
                   Add GitHub account
                 </a>
               </Button>
