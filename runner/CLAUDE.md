@@ -65,3 +65,15 @@
 - Separate concerns appropriately
 - Create clear boundaries between modules
 - Document architecture decisions
+
+## GitHub Workflow Best Practices
+- Write clear, descriptive commit messages
+- Create focused pull requests with single responsibility
+- Include detailed PR descriptions explaining changes
+- Link issues in commit messages and PRs
+- Keep PRs small and manageable for easier review
+- Request appropriate reviewers with domain knowledge
+- Add relevant labels and milestones to issues and PRs
+- Use draft PRs for work in progress
+- Address review comments promptly and thoroughly
+- Squash commits before merging when appropriate
