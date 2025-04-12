@@ -147,14 +147,12 @@ export default async function Issues({
           </div>
         </form>
 
-        {issuesData && issuesData.issues.length > 0 ? (
+        {issuesData && issuesData.length > 0 ? (
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">
-              Issues from {issuesData.repoName}
-            </h3>
+            <h3 className="text-lg font-medium">Issues from {repoId}</h3>
             <div className="grid gap-3">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {issuesData.issues.map((issue: any) => (
+              {issuesData.map((issue: any) => (
                 <form key={issue.id} action={handleRunIssue}>
                   <input
                     type="hidden"

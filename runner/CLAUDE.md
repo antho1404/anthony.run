@@ -24,6 +24,16 @@
 - Memoize callbacks and expensive computations
 - Avoid prop drilling with context when appropriate
 
+## Linting and Formatting
+- Always run `npm run lint` to verify code quality before committing changes
+- Follow Next.js ESLint core web vitals and TypeScript configuration
+- Use proper TypeScript types and avoid type errors
+- Maintain consistent indentation and spacing
+- Avoid eslint warnings and errors by adhering to project conventions
+- Follow modern ES6+ syntax patterns as used throughout the codebase
+- Respect the component styling patterns used with tailwindcss
+- Ensure all code passes linting before considering it complete
+
 ## Testing Framework
 - Write comprehensive unit tests for business logic
 - Test components in isolation with rendering tests
