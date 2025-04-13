@@ -1,6 +1,7 @@
 import { clerkClient } from "@/lib/clerk";
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/core";
+export * from "./pull-request";
 
 const privateKey = Buffer.from(
   process.env.GITHUB_PRIVATE_KEY_B64 || "",

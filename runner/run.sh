@@ -25,9 +25,60 @@ claude --print --json "$PROMPT. Add all files and commit everything relevant" --
 # claude --print --json "$PROMPT"
 echo '{"result": "'"$PROMPT"'"}'
 
-# git add .
-# git commit -m "temp"
+# Push changes to GitHub
 git push origin "$BRANCH"
+
+# If GitHub token is available, create PR via GitHub CLI
+if [ -n "$GITHUB_TOKEN" ] && [ -n "$REPO_OWNER" ] && [ -n "$REPO_NAME" ] && [ -n "$ISSUE_NUMBER" ]; then
+  echo "Creating pull request..."
+  
+  # Get the list of commits in this branch that aren't in main
+  COMMITS=$(git log --format="%s" origin/main.."$BRANCH")
+  
+  # Format commits for PR description
+  COMMITS_LIST=""
+  while IFS= read -r line; do
+    COMMITS_LIST="$COMMITS_LIST- $line\n"
+  done <<< "$COMMITS"
+  
+  # Create PR directly using GitHub API (no need for gh CLI)
+  PR_TITLE="Fix #$ISSUE_NUMBER: $(echo $BRANCH | sed 's/issue-[0-9]*-//' | sed 's/-/ /g')"
+  PR_BODY=$(cat <<EOF
+## Summary
+This PR addresses issue #$ISSUE_NUMBER.
+
+## Changes
+$COMMITS_LIST
+
+Closes #$ISSUE_NUMBER
+EOF
+)
+
+  # Use curl to create PR
+  curl -X POST \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/pulls \
+    -d @- <<EOF
+{
+  "title": "$PR_TITLE",
+  "body": "$PR_BODY",
+  "head": "$BRANCH",
+  "base": "main"
+}
+EOF
+
+  echo "PR created successfully"
+
+  # Try to assign PR to repo owner
+  # We'd need to get the PR number from the response above to make this work
+  # This is a simplified version
+  curl -X POST \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.v3+json" \
+    https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/issues/$ISSUE_NUMBER/assignees \
+    -d '{"assignees":["'"$REPO_OWNER"'"]}'
+fi
 
 # Cleanup
 cd /
