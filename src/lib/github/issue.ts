@@ -1,6 +1,7 @@
 import { getIssueDetails, getRepoUrl } from "@/lib/github";
 import { Event } from "@/lib/github/type";
 import { generatePromptFromIssue } from "@/lib/prompt";
+import { run } from "@/lib/runner";
 import { NextResponse } from "next/server";
 import { invariant } from "ts-invariant";
 
@@ -80,16 +81,10 @@ async function processIssueOrComment(
     issueDetails.repoName
   );
 
-  console.log(branchName);
-  console.log(prompt);
   // Run the task with the generated prompt
-  // await run({
-  //   repoUrl,
-  //   prompt,
-  //   branch: branchName,
-  // });
-
-  console.log(
-    `Processing issue #${payload.issue.id} from ${payload.repository.full_name}`
-  );
+  await run({
+    repoUrl,
+    prompt,
+    branch: branchName,
+  });
 }
