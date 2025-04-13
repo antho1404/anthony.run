@@ -39,7 +39,11 @@ export async function POST(req: NextRequest) {
       JSON.parse(rawBody) as Event<"issues-opened" | "issues-edited">
     );
 
-  if (event === "issue-comment-created" || event === "issue-comment-edited")
+  if (
+    event === "issue_comment" ||
+    event === "issue-comment-created" ||
+    event === "issue-comment-edited"
+  )
     await handleIssueCommentEvent(
       JSON.parse(rawBody) as Event<
         "issue-comment-created" | "issue-comment-edited"
