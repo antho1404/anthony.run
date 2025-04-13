@@ -1,4 +1,5 @@
-import { addInstallation, removeInstallation } from "@/lib/github";
+import { handleInstallationEvent } from "@/lib/github/installation";
+import { handleIssueCommentEvent, handleIssueEvent } from "@/lib/github/issue";
 import { webhooks as webhooksType } from "@octokit/openapi-webhooks-types";
 import { Webhooks } from "@octokit/webhooks";
 import { headers } from "next/headers";
@@ -22,15 +23,28 @@ export async function POST(req: NextRequest) {
 
   const event = headersPayload.get("x-github-event");
 
-  if (event === "installation") {
-    const payload = JSON.parse(rawBody) as Event<
-      "installation-created" | "installation-deleted"
-    >;
-    if (payload.action === "created")
-      await addInstallation(payload.sender.id, payload.installation.id);
-    if (payload.action === "deleted")
-      await removeInstallation(payload.sender.id, payload.installation.id);
-  }
+  if (event === "installation")
+    await handleInstallationEvent(
+      JSON.parse(rawBody) as Event<
+        "installation-created" | "installation-deleted"
+      >
+    );
+
+  if (
+    event === "issues" ||
+    event === "issues-opened" ||
+    event === "issues-edited"
+  )
+    await handleIssueEvent(
+      JSON.parse(rawBody) as Event<"issues-opened" | "issues-edited">
+    );
+
+  if (event === "issue-comment-created" || event === "issue-comment-edited")
+    await handleIssueCommentEvent(
+      JSON.parse(rawBody) as Event<
+        "issue-comment-created" | "issue-comment-edited"
+      >
+    );
 
   return NextResponse.json({ success: true });
 }

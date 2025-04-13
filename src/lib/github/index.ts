@@ -1,5 +1,4 @@
 import { clerkClient } from "@/lib/clerk";
-import { currentUser } from "@clerk/nextjs/server";
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/core";
 
@@ -20,7 +19,7 @@ async function findUserByGithubId(githubUserId: string | number) {
   return users.data.length > 0 ? users.data[0] : null;
 }
 
-async function getInstallationToken(installationId: number) {
+export async function getInstallationToken(installationId: number) {
   return (await appAuth({ type: "installation", installationId })).token;
 }
 
@@ -55,32 +54,31 @@ export async function removeInstallation(
   });
 }
 
-export async function getAccountRepositoriesByInstallationId() {
-  const user = await currentUser();
+export async function getAccountRepositoriesByInstallationIds(
+  installationIds: number[]
+) {
   const { token } = await appAuth({ type: "app" });
   const app = new Octokit({ auth: token });
   return await Promise.all(
-    (user?.privateMetadata.githubInstallationIds || []).map(
-      async (installationId) => {
-        const token = await getInstallationToken(installationId);
-        const user = new Octokit({ auth: token });
-        const response = await user.request("GET /installation/repositories");
-        const installation = await app.request(
-          "GET /app/installations/{installation_id}",
-          { installation_id: installationId }
-        );
-        return {
-          installationId,
-          account: installation.data.account,
-          repositories: response.data.repositories,
-        };
-      }
-    )
+    installationIds.map(async (installationId) => {
+      const token = await getInstallationToken(installationId);
+      const user = new Octokit({ auth: token });
+      const response = await user.request("GET /installation/repositories");
+      const installation = await app.request(
+        "GET /app/installations/{installation_id}",
+        { installation_id: installationId }
+      );
+      return {
+        installationId,
+        account: installation.data.account,
+        repositories: response.data.repositories,
+      };
+    })
   );
 }
 
-export async function getRepoUrl(repoId: number) {
-  const items = await getAccountRepositoriesByInstallationId();
+export async function getRepoUrl(repoId: number, installationId: number) {
+  const items = await getAccountRepositoriesByInstallationIds([installationId]);
   const item = items.find(({ repositories }) =>
     repositories.find((repo) => repo.id === repoId)
   );
@@ -94,8 +92,12 @@ export async function getRepoUrl(repoId: number) {
   return url;
 }
 
-export async function getIssueDetails(repoId: number, issueNumber: number) {
-  const items = await getAccountRepositoriesByInstallationId();
+export async function getIssueDetails(
+  repoId: number,
+  issueNumber: number,
+  installationId: number
+) {
+  const items = await getAccountRepositoriesByInstallationIds([installationId]);
   const item = items.find(({ repositories }) =>
     repositories.find((repo) => repo.id === repoId)
   );
@@ -131,4 +133,45 @@ export async function getIssueDetails(repoId: number, issueNumber: number) {
     repoOwner: repo.owner.login,
     repoName: repo.name,
   };
+}
+
+// Find repository and installation details by repository ID
+export async function findRepositoryByID(repositoryId: number) {
+  const { token } = await appAuth({ type: "app" });
+  const app = new Octokit({ auth: token });
+
+  // Get all installations
+  const installations = await app.request("GET /app/installations");
+
+  // Check each installation for the repository
+  for (const installation of installations.data) {
+    try {
+      // Get installation token
+      const installationToken = await getInstallationToken(installation.id);
+      const octokit = new Octokit({ auth: installationToken });
+
+      // Get repositories for this installation
+      const response = await octokit.request("GET /installation/repositories");
+
+      // Find repository by ID
+      const repository = response.data.repositories.find(
+        (repo) => repo.id === repositoryId
+      );
+
+      if (repository) {
+        return {
+          repository,
+          installationId: installation.id,
+          account: installation.account,
+        };
+      }
+    } catch (error) {
+      console.error(
+        `Error fetching repositories for installation ${installation.id}:`,
+        error
+      );
+    }
+  }
+
+  return null;
 }

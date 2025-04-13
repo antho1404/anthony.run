@@ -9,8 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getAccountRepositoriesByInstallationId } from "@/lib/github";
+import { getAccountRepositoriesByInstallationIds } from "@/lib/github";
 import { cn } from "@/lib/utils";
+import { currentUser } from "@clerk/nextjs/server";
 import { GitCommitVerticalIcon, PlusCircleIcon } from "lucide-react";
 import { Metadata } from "next";
 import Image from "next/image";
@@ -26,8 +27,11 @@ export default async function Issues({
 }: {
   searchParams: Promise<{ repoId?: string }>;
 }) {
+  const user = await currentUser();
   const repositoriesByInstallation =
-    await getAccountRepositoriesByInstallationId();
+    await getAccountRepositoriesByInstallationIds(
+      user?.privateMetadata.githubInstallationIds ?? []
+    );
   const params = await searchParams;
   const repoId = params.repoId ? parseInt(params.repoId) : undefined;
 
@@ -38,47 +42,6 @@ export default async function Issues({
 
     redirect(`/dashboard/issues?repoId=${repoId}`);
   }
-
-  // async function handleRunIssue(formData: FormData) {
-  //   "use server";
-  //   const repoId = formData.get("repoId");
-  //   const issueNumber = formData.get("issueNumber");
-  //   if (!repoId) throw new Error("Invalid repo ID");
-  //   if (!issueNumber) throw new Error("Invalid issue number");
-
-  //   const issueDetails = await getIssueDetails(
-  //     Number(repoId),
-  //     Number(issueNumber)
-  //   );
-  //   if (!issueDetails) throw new Error("Could not fetch issue details");
-
-  //   const repoUrl = await getRepoUrl(Number(repoId));
-  //   if (!repoUrl) throw new Error("Invalid repo URL");
-
-  //   // Create branch name from issue title
-  //   const branchName = `issue-${issueNumber}-${issueDetails.issue.title
-  //     .toLowerCase()
-  //     .replace(/[^\w\s-]/g, "")
-  //     .replace(/\s+/g, "-")
-  //     .substring(0, 30)}`;
-
-  //   // Generate optimized prompt from issue details
-  //   const prompt = generatePromptFromIssue(
-  //     issueDetails.issue,
-  //     issueDetails.comments,
-  //     issueDetails.repoFullName,
-  //     issueDetails.repoOwner,
-  //     issueDetails.repoName
-  //   );
-
-  //   await run({
-  //     repoUrl: repoUrl,
-  //     prompt,
-  //     branch: branchName,
-  //   });
-
-  //   redirect("/dashboard");
-  // }
 
   return (
     <Card>
