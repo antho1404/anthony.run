@@ -94,29 +94,6 @@ export async function getRepoUrl(repoId: number) {
   return url;
 }
 
-export async function getRepositoryIssues(repoId: number) {
-  const items = await getAccountRepositoriesByInstallationId();
-  const item = items.find(({ repositories }) =>
-    repositories.find((repo) => repo.id === repoId)
-  );
-  if (!item) return null;
-  const repo = item.repositories.find((repo) => repo.id === repoId);
-  if (!repo) return null;
-
-  const token = await getInstallationToken(item.installationId);
-  const octokit = new Octokit({ auth: token });
-
-  const response = await octokit.request("GET /repos/{owner}/{repo}/issues", {
-    owner: repo.owner.login,
-    repo: repo.name,
-    state: "open",
-    sort: "updated",
-    per_page: 100,
-  });
-
-  return response.data;
-}
-
 export async function getIssueDetails(repoId: number, issueNumber: number) {
   const items = await getAccountRepositoriesByInstallationId();
   const item = items.find(({ repositories }) =>
