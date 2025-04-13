@@ -66,7 +66,7 @@ async function processIssueOrComment(
   }
 
   // Create branch name from issue title
-  const branchName = `issue-${payload.issue.id}-${payload.issue.title
+  const branchName = `issue-${payload.issue.number}-${payload.issue.title
     .toLowerCase()
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-")
