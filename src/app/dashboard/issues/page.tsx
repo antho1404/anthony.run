@@ -16,6 +16,7 @@ import {
   getRepositoryIssues,
   getRepoUrl,
 } from "@/lib/github";
+import { generatePromptFromIssue } from "@/lib/prompt";
 import { run } from "@/lib/runner";
 import { cn } from "@/lib/utils";
 import { GitCommitVerticalIcon, PlusCircleIcon } from "lucide-react";
@@ -71,7 +72,13 @@ export default async function Issues({
       .substring(0, 30)}`;
 
     // Generate optimized prompt from issue details
-    const prompt = generatePromptFromIssue(issueDetails);
+    const prompt = generatePromptFromIssue(
+      issueDetails.issue,
+      issueDetails.comments,
+      issueDetails.repoFullName,
+      issueDetails.repoOwner,
+      issueDetails.repoName
+    );
 
     await run({
       repoUrl: repoUrl,
@@ -248,134 +255,4 @@ function formatCreatedAt(createdAt: string): string {
     const years = Math.floor(diffInSeconds / 31536000);
     return `${years} ${years === 1 ? "year" : "years"} ago`;
   }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function generatePromptFromIssue(issueDetails: any): string {
-  const { issue, comments, repoFullName, repoOwner, repoName } = issueDetails;
-
-  let prompt = `# GitHub Issue: ${issue.title}\n\n`;
-  prompt += `Issue #${issue.number} from ${repoFullName}\n\n`;
-
-  // Extract key information from the issue body
-  const issueBody = issue.body || "";
-  prompt += `## Issue Description\n\n${issueBody}\n\n`;
-
-  // Add relevant labels as context
-  if (issue.labels && issue.labels.length > 0) {
-    prompt += `## Labels\n`;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    issue.labels.forEach((label: any) => {
-      prompt += `- ${label.name}\n`;
-    });
-    prompt += `\n`;
-  }
-
-  // Add comments if any, focusing on technical details
-  if (comments.length > 0) {
-    prompt += `## Discussion Context\n\n`;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    comments.forEach((comment: any) => {
-      prompt += `**@${comment.user.login}:**\n${comment.body}\n\n`;
-    });
-  }
-
-  // Add specific instructions for the AI
-  prompt += `\n## Task\n\n`;
-  prompt += `Please solve this issue by implementing the necessary changes to the codebase. Follow these guidelines:\n\n`;
-  prompt += `1. **Analyze the issue:** Understand the requirements, constraints, and underlying problems\n`;
-  prompt += `2. **Explore the codebase:** Identify relevant files and components that need to be modified\n`;
-  prompt += `3. **Implement a solution:** Make the minimal necessary changes to address the issue\n`;
-  prompt += `4. **Follow best practices:** Ensure your code is clean, maintainable, and consistent with the project style\n`;
-  prompt += `5. **Add tests if appropriate:** Cover your changes with tests when applicable\n`;
-
-  // Add repository context
-  prompt += `\n## Repository Context\n`;
-  prompt += `- Owner: ${repoOwner}\n`;
-  prompt += `- Repository: ${repoName}\n`;
-  prompt += `- Issue URL: https://github.com/${repoFullName}/issues/${issue.number}\n\n`;
-
-  // Add technical hints and focus areas based on issue content
-  const keywords = extractKeywords(issueBody);
-  if (keywords.length > 0) {
-    prompt += `## Focus Areas\n`;
-    prompt += `Based on the issue content, pay special attention to these aspects:\n`;
-    keywords.forEach((keyword) => {
-      prompt += `- ${keyword}\n`;
-    });
-    prompt += `\n`;
-  }
-
-  prompt += `Please provide a detailed solution that addresses all aspects of this issue. Thank you!`;
-
-  return prompt;
-}
-
-function extractKeywords(text: string): string[] {
-  if (!text) return [];
-
-  // List of technical terms to look for in issues
-  const technicalPatterns = [
-    // UI/Frontend patterns
-    /component/i,
-    /UI/i,
-    /interface/i,
-    /display/i,
-    /render/i,
-    /style/i,
-    /CSS/i,
-    /responsive/i,
-    /animation/i,
-    /layout/i,
-    /theme/i,
-    /accessibility/i,
-    /a11y/i,
-
-    // Backend/data patterns
-    /API/i,
-    /endpoint/i,
-    /database/i,
-    /performance/i,
-    /query/i,
-    /cache/i,
-    /auth[entication|orization]/i,
-    /security/i,
-    /data/i,
-    /validation/i,
-
-    // General development terms
-    /bug/i,
-    /feature/i,
-    /implement/i,
-    /fix/i,
-    /error/i,
-    /exception/i,
-    /test/i,
-    /documentation/i,
-    /refactor/i,
-    /optimize/i,
-  ];
-
-  // Extract keywords based on patterns
-  const keywords = new Set<string>();
-
-  technicalPatterns.forEach((pattern) => {
-    const match = text.match(pattern);
-    if (match && match[0]) {
-      keywords.add(match[0]);
-    }
-  });
-
-  // Also look for code fragments or technical terms wrapped in backticks
-  const codeFragments = text.match(/`([^`]+)`/g);
-  if (codeFragments) {
-    codeFragments.forEach((fragment) => {
-      const cleaned = fragment.replace(/`/g, "").trim();
-      if (cleaned.length > 0) {
-        keywords.add(cleaned);
-      }
-    });
-  }
-
-  return Array.from(keywords);
 }

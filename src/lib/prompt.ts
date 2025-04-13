@@ -1,0 +1,140 @@
+import { components } from "@octokit/openapi-types";
+
+export function generatePromptFromIssue(
+  issue: components["schemas"]["issue"],
+  comments: components["schemas"]["issue-comment"][],
+  repoFullName: string,
+  repoOwner: string,
+  repoName: string
+): string {
+  const keywords = extractKeywords(issue.body || "");
+
+  return `
+# GitHub Issue: ${issue.title}
+
+Issue #${issue.number} from ${repoFullName}
+
+## Issue Description
+
+${issue.body}
+
+## Labels
+
+${
+  issue.labels
+    ? issue.labels
+        .map((label) => (typeof label === "string" ? label : label.name))
+        .join(", ")
+    : "n/a"
+}
+
+## Discussion Context
+
+${
+  comments.length > 0
+    ? comments
+        .map(
+          (comment) => `**@${comment.user?.login || "n/a"}:**
+${comment.body}
+
+`
+        )
+        .join("\n")
+    : "n/a"
+}
+
+## Task
+
+Please solve this issue by implementing the necessary changes to the codebase. Follow these guidelines:
+
+1. **Analyze the issue:** Understand the requirements, constraints, and underlying problems
+2. **Explore the codebase:** Identify relevant files and components that need to be modified
+3. **Implement a solution:** Make the minimal necessary changes to address the issue
+4. **Follow best practices:** Ensure your code is clean, maintainable, and consistent with the project style
+5. **Add tests if appropriate:** Cover your changes with tests when applicable
+
+## Repository Context
+
+- Owner: ${repoOwner}
+- Repository: ${repoName}
+- Issue URL: https://github.com/${repoFullName}/issues/${issue.number}
+
+## Focus Areas
+
+Based on the issue content, pay special attention to these aspects:
+
+${
+  keywords.length > 0
+    ? keywords.map((keyword) => `- ${keyword}`).join("\n")
+    : "n/a"
+}
+
+## Task
+
+Please provide a detailed solution that addresses all aspects of this issue. Thank you!`;
+}
+
+function extractKeywords(text: string): string[] {
+  if (!text) return [];
+
+  // List of technical terms to look for in issues
+  const technicalPatterns = [
+    // UI/Frontend patterns
+    /component/i,
+    /UI/i,
+    /interface/i,
+    /display/i,
+    /render/i,
+    /style/i,
+    /CSS/i,
+    /responsive/i,
+    /animation/i,
+    /layout/i,
+    /theme/i,
+    /accessibility/i,
+    /a11y/i,
+
+    // Backend/data patterns
+    /API/i,
+    /endpoint/i,
+    /database/i,
+    /performance/i,
+    /query/i,
+    /cache/i,
+    /auth[entication|orization]/i,
+    /security/i,
+    /data/i,
+    /validation/i,
+
+    // General development terms
+    /bug/i,
+    /feature/i,
+    /implement/i,
+    /fix/i,
+    /error/i,
+    /exception/i,
+    /test/i,
+    /documentation/i,
+    /refactor/i,
+    /optimize/i,
+  ];
+
+  // Extract keywords based on patterns
+  const keywords = new Set<string>();
+
+  technicalPatterns.forEach((pattern) => {
+    const match = text.match(pattern);
+    if (match && match[0]) keywords.add(match[0]);
+  });
+
+  // Also look for code fragments or technical terms wrapped in backticks
+  const codeFragments = text.match(/`([^`]+)`/g);
+  if (codeFragments) {
+    codeFragments.forEach((fragment) => {
+      const cleaned = fragment.replace(/`/g, "").trim();
+      if (cleaned.length > 0) keywords.add(cleaned);
+    });
+  }
+
+  return Array.from(keywords);
+}
