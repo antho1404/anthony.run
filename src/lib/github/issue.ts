@@ -2,12 +2,14 @@ import { getIssueDetails, getRepoUrl } from "@/lib/github";
 import { Event } from "@/lib/github/type";
 import { generatePromptFromIssue } from "@/lib/prompt";
 import { NextResponse } from "next/server";
+import { invariant } from "ts-invariant";
 
 const command = "@anthony.run";
 
 export async function handleIssueEvent(
   payload: Event<"issues-opened" | "issues-edited">
 ) {
+  if (!canProcessIssue(payload)) return;
   if (!payload.issue.body?.includes(command)) return;
   return await processIssueOrComment(payload);
 }
@@ -15,8 +17,25 @@ export async function handleIssueEvent(
 export function handleIssueCommentEvent(
   payload: Event<"issue-comment-created" | "issue-comment-edited">
 ) {
+  if (!canProcessIssue(payload)) return;
   if (!payload.comment.body?.includes(command)) return;
   return processIssueOrComment(payload);
+}
+
+function canProcessIssue({
+  issue,
+  installation,
+}: Event<
+  | "issues-opened"
+  | "issues-edited"
+  | "issue-comment-created"
+  | "issue-comment-edited"
+>) {
+  if (issue.locked) return false;
+  if (issue.pull_request) return false;
+  if (issue.state === "closed") return false;
+  if (!installation) return false;
+  return true;
 }
 
 async function processIssueOrComment(
@@ -27,8 +46,7 @@ async function processIssueOrComment(
     | "issue-comment-edited"
   >
 ) {
-  debugger;
-  if (!payload.installation?.id) return;
+  invariant(payload.installation);
 
   const issueDetails = await getIssueDetails(
     payload.repository.id,
