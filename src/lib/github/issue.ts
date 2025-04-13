@@ -81,14 +81,10 @@ async function processIssueOrComment(
     issueDetails.repoName
   );
 
-  // Run the task with the generated prompt and pass issue information for PR creation
+  // Run the task with the generated prompt
   await run({
     repoUrl,
     prompt,
     branch: branchName,
-    issueNumber: payload.issue.number,
-    repoOwner: issueDetails.repoOwner,
-    repoName: issueDetails.repoName,
-    installationId: payload.installation.id,
   });
 }
