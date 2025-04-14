@@ -1,3 +1,4 @@
+import { Brandmark } from "@/components/brandmark";
 import {
   Sidebar,
   SidebarContent,
@@ -28,8 +29,8 @@ export default function Dashboard({ children }: PropsWithChildren) {
   return (
     <SidebarProvider>
       <Sidebar variant="inset" collapsible="offcanvas">
-        <SidebarHeader className="text-lg font-semibold pl-10">
-          anthony • run
+        <SidebarHeader className="text-lg font-semibold pl-10 flex flex-row">
+          <Brandmark />
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
