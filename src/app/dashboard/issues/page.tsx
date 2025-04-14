@@ -18,7 +18,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Project to name * Issues",
+  title: "Issues • anthony • run",
   description: "Solve issues without touching a single line of code",
 };
 

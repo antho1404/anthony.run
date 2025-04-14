@@ -1,3 +1,4 @@
+import { Brandmark } from "@/components/brandmark";
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,7 @@ import { ChevronRightIcon, InfoIcon, Loader2Icon } from "lucide-react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Project to name *",
+  title: "anthony • run",
   description:
     "Get ready for a revolutionary app designed to transform issues into ready-to-merge pull requests — saving your team up to 90% of development time.",
 };
@@ -30,8 +31,8 @@ export default function Home() {
         </a>
       </Button>
 
-      <h1 className="text-5xl md:text-7xl font-bold mb-8 mt-4">
-        Project to name<sup>*</sup>
+      <h1 className="text-5xl md:text-7xl font-bold mb-8 mt-4 flex items-center">
+        <Brandmark />
       </h1>
 
       <p className="text-xl md:text-2xl text-muted-foreground max-w-xl">
@@ -50,11 +51,8 @@ export default function Home() {
       </p>
 
       <p className="text-lg md:text-xl text-muted-foreground max-w-xl mt-4">
-        Get ready for a revolutionary app designed to{" "}
-        <span className="italic font-semibold">
-          transform issues into ready-to-merge pull requests
-        </span>{" "}
-        — saving your team up to 90% of development time.
+        Tag <span className="font-semibold italic">@anthony.run</span> on your
+        GitHub issue and get a pull request ready to review and merge.
       </p>
 
       <div className="min-h-80 flex items-center justify-center w-full max-w-96 mt-12">
@@ -62,12 +60,6 @@ export default function Home() {
           fallback={<Loader2Icon className="absolute animate-spin" />}
         />
       </div>
-      <p className="text-sm md:fixed bottom-0 right-0 p-4 text-muted-foreground bg-gradient-to-t md:bg-none from-transparent via-white to-white">
-        <sup>*</sup> We promise we will find a good name, you have some idea?{" "}
-        <a target="_blank" href="https://x.com/antho1404" className="link">
-          Reach out.
-        </a>
-      </p>
     </>
   );
 }
