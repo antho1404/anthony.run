@@ -1,4 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Project-to-name
+
+A revolutionary app designed to transform GitHub issues into ready-to-merge pull requests — saving your team up to 90% of development time.
+
+## Overview
+
+Project-to-name is an AI-powered GitHub integration that automatically solves issues in your repositories. It connects to your GitHub account, analyzes open issues, and generates pull requests with solutions - all without requiring you to write a single line of code.
+
+### Key Features
+
+- **GitHub Integration**: Connect your GitHub account and repositories
+- **Issue Resolution**: Select issues to be automatically resolved
+- **AI-Powered Solutions**: Generate high-quality code fixes for identified problems
+- **Pull Request Generation**: Create pull requests ready for review and merging
+
+## How It Works
+
+1. Connect your GitHub account via the GitHub App integration
+2. Select a repository and view its open issues
+3. Choose an issue to be solved automatically
+4. Our AI analyzes the issue and repository context
+5. A machine is spun up to generate a solution
+6. A pull request is created with the proposed fix
+
+## Tech Stack
+
+- **Frontend**: Next.js with React
+- **Authentication**: Clerk
+- **GitHub Integration**: GitHub App with Octokit
+- **Deployment**: Vercel for the web app, Fly.io for runners
+- **AI**: Anthropic Claude for code generation
 
 ## Getting Started
 
@@ -16,21 +46,19 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To run this project, you'll need to set up the following environment variables:
 
-## Learn More
+- GitHub App credentials
+- Clerk authentication keys
+- Fly.io API token
+- Anthropic API key
 
-To learn more about Next.js, take a look at the following resources:
+## Contributing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Contributions are welcome! This project is in active development, and we're looking for feedback and ideas to improve it.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[MIT](https://choosealicense.com/licenses/mit/)
