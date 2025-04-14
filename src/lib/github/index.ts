@@ -11,7 +11,7 @@ const appAuth = createAppAuth({
   privateKey: privateKey,
 });
 
-async function findUserByGithubId(githubUserId: string | number) {
+export async function findUserByGithubId(githubUserId: string | number) {
   const users = await clerkClient.users.getUserList({
     externalId: [githubUserId.toString()],
     limit: 1,

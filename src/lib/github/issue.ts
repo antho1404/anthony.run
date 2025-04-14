@@ -1,7 +1,7 @@
-import { getIssueDetails, getRepoUrl } from "@/lib/github";
+import { findUserByGithubId, getIssueDetails, getRepoUrl } from "@/lib/github";
 import { Event } from "@/lib/github/type";
 import { generatePromptFromIssue } from "@/lib/prompt";
-import { run } from "@/lib/runner";
+import { createRun } from "@/lib/run";
 import { NextResponse } from "next/server";
 import { invariant } from "ts-invariant";
 
@@ -49,6 +49,9 @@ async function processIssueOrComment(
 ) {
   invariant(payload.installation);
 
+  const user = await findUserByGithubId(payload.sender.id);
+  if (!user) return NextResponse.json({ success: true });
+
   const issueDetails = await getIssueDetails(
     payload.repository.id,
     payload.issue.number,
@@ -82,9 +85,14 @@ async function processIssueOrComment(
   );
 
   // Run the task with the generated prompt
-  await run({
+  await createRun({
     repoUrl,
     prompt,
     branch: branchName,
+    issueNumber: payload.issue.number,
+    installationId: payload.installation.id,
+    userId: user?.id,
   });
+
+  return NextResponse.json({ success: true });
 }
