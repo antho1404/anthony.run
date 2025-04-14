@@ -38,7 +38,7 @@ export async function createPullRequest({
     body: `${content}
 
 ## Result
-View the execution result: https://project-to-name.com/dashboard/execution/${executionId}
+View the execution result: https://anthony.run/dashboard/execution/${executionId}
 
 Closes #${issueNumber}`,
     draft: false,
