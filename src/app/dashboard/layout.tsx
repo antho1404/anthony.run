@@ -29,7 +29,7 @@ export default function Dashboard({ children }: PropsWithChildren) {
     <SidebarProvider>
       <Sidebar variant="inset" collapsible="offcanvas">
         <SidebarHeader className="text-lg font-semibold pl-10">
-          Project to name
+          anthony • run
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>

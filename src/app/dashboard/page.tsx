@@ -9,7 +9,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Project to name * Dashboard",
+  title: "Dashboard • anthony • run",
   description:
     "Get ready for a revolutionary app designed to transform issues into ready-to-merge pull requests — saving your team up to 90% of development time.",
 };

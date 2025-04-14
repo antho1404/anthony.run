@@ -50,11 +50,8 @@ export default function Home() {
       </p>
 
       <p className="text-lg md:text-xl text-muted-foreground max-w-xl mt-4">
-        Get ready for a revolutionary app designed to{" "}
-        <span className="italic font-semibold">
-          transform issues into ready-to-merge pull requests
-        </span>{" "}
-        — saving your team up to 90% of development time.
+        Tag <span className="font-semibold italic">@anthony.run</span> on your
+        GitHub issue and get a pull request ready to review and merge.
       </p>
 
       <div className="min-h-80 flex items-center justify-center w-full max-w-96 mt-12">
@@ -62,12 +59,6 @@ export default function Home() {
           fallback={<Loader2Icon className="absolute animate-spin" />}
         />
       </div>
-      <p className="text-sm md:fixed bottom-0 right-0 p-4 text-muted-foreground bg-gradient-to-t md:bg-none from-transparent via-white to-white">
-        <sup>*</sup> We promise we will find a good name, you have some idea?{" "}
-        <a target="_blank" href="https://x.com/antho1404" className="link">
-          Reach out.
-        </a>
-      </p>
     </>
   );
 }
