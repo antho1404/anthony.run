@@ -1,7 +1,7 @@
 import { getIssueDetails, getRepoUrl } from "@/lib/github";
 import { Event } from "@/lib/github/type";
 import { generatePromptFromIssue } from "@/lib/prompt";
-import { run } from "@/lib/runner";
+import { createRun } from "@/lib/run";
 import { NextResponse } from "next/server";
 import { invariant } from "ts-invariant";
 
@@ -82,7 +82,7 @@ async function processIssueOrComment(
   );
 
   // Run the task with the generated prompt
-  await run({
+  await createRun({
     repoUrl,
     prompt,
     branch: branchName,
