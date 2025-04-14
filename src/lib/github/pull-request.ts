@@ -1,15 +1,6 @@
 import { Octokit } from "@octokit/core";
 import { getInstallationToken } from "./index";
 
-export interface PRDetails {
-  issueNumber: number;
-  repoOwner: string;
-  repoName: string;
-  branch: string;
-  baseRef: string;
-  executionId: string;
-}
-
 export async function createPullRequest({
   installationId,
   issueNumber,
@@ -18,7 +9,17 @@ export async function createPullRequest({
   branch,
   baseRef = "main",
   executionId,
-}: PRDetails & { installationId: number }) {
+  content,
+}: {
+  installationId: number;
+  issueNumber: number;
+  repoOwner: string;
+  repoName: string;
+  branch: string;
+  baseRef?: string;
+  executionId: string;
+  content: string;
+}) {
   const token = await getInstallationToken(installationId);
   const octokit = new Octokit({ auth: token });
 
@@ -34,8 +35,7 @@ export async function createPullRequest({
     title,
     head: branch,
     base: baseRef,
-    body: `## Summary
-This PR addresses issue #${issueNumber}.
+    body: `${content}
 
 ## Result
 View the execution result: https://project-to-name.com/dashboard/execution/${executionId}
@@ -56,8 +56,7 @@ Closes #${issueNumber}`,
         assignees: [repoOwner],
       }
     );
-  } catch (error) {
-    console.error("Failed to assign PR:", error);
+  } catch {
     // Continue even if assignment fails
   }
 

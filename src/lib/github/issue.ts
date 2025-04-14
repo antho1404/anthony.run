@@ -1,4 +1,4 @@
-import { getIssueDetails, getRepoUrl } from "@/lib/github";
+import { findUserByGithubId, getIssueDetails, getRepoUrl } from "@/lib/github";
 import { Event } from "@/lib/github/type";
 import { generatePromptFromIssue } from "@/lib/prompt";
 import { createRun } from "@/lib/run";
@@ -49,6 +49,9 @@ async function processIssueOrComment(
 ) {
   invariant(payload.installation);
 
+  const user = await findUserByGithubId(payload.sender.id);
+  if (!user) return NextResponse.json({ success: true });
+
   const issueDetails = await getIssueDetails(
     payload.repository.id,
     payload.issue.number,
@@ -86,5 +89,10 @@ async function processIssueOrComment(
     repoUrl,
     prompt,
     branch: branchName,
+    issueNumber: payload.issue.number,
+    installationId: payload.installation.id,
+    userId: user?.id,
   });
+
+  return NextResponse.json({ success: true });
 }

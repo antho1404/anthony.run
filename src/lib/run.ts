@@ -57,7 +57,7 @@ async function createFlyMachine(run: Run) {
 async function createDockerContainer(run: Run) {
   try {
     const output = execSync(
-      `docker run -d \
+      `docker run -d --rm \
 -e ANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY} \
 claude-runner \
 "${run.repoUrl}" \
@@ -83,16 +83,25 @@ export async function createRun({
   repoUrl,
   prompt,
   branch,
+  issueNumber,
+  installationId,
+  userId,
 }: {
   repoUrl: URL;
   prompt: string;
   branch: string;
+  issueNumber: number;
+  installationId: number;
+  userId: string;
 }) {
   const run = await prisma.run.create({
     data: {
       branch,
       prompt,
       repoUrl: repoUrl.toString(),
+      issueNumber,
+      installationId,
+      userId,
     },
   });
 

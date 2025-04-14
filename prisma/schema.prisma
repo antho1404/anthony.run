@@ -15,14 +15,17 @@ datasource db {
 }
 
 model Run {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  prompt      String
-  branch      String
-  repoUrl     String
-  output      String?
-  containerId String?
-  error       String?
-  image       String   @default("ghcr.io/antho1404/claude-runner:latest")
-  region      String   @default("sin")
+  id             String   @id @default(cuid())
+  userId         String
+  installationId Int
+  prompt         String
+  branch         String
+  issueNumber    Int
+  repoUrl        String
+  output         String?
+  containerId    String?
+  error          String?
+  image          String   @default("ghcr.io/antho1404/claude-runner:latest")
+  region         String   @default("sin")
+  createdAt      DateTime @default(now())
 }
