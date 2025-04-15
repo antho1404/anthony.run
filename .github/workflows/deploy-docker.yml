@@ -33,3 +33,6 @@ jobs:
           push: true
           tags: ghcr.io/antho1404/anthony.run:latest
           platforms: linux/amd64
+          cache-from: type=registry,ref=ghcr.io/antho1404/anthony.run:latest
+          cache-to: type=inline
+          outputs: type=registry
