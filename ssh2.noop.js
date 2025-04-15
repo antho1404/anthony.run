@@ -1,1 +1,1 @@
-export class Client extends EventEmitter {}
+export class Client {}
