@@ -59,7 +59,7 @@ async function createDockerContainer(run: Run) {
     const output = execSync(
       `docker run -d --rm \
 -e ANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY} \
-claude-runner \
+anthony.run \
 "${run.repoUrl}" \
 "${run.prompt.replace(/[\"\$`]/g, (m) => `\\${m}`)}" \
 "${run.branch}" \
