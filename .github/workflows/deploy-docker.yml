@@ -31,5 +31,5 @@ jobs:
         with:
           context: ./runner
           push: true
-          tags: ghcr.io/antho1404/claude-runner:latest
+          tags: ghcr.io/antho1404/anthony.run:latest
           platforms: linux/amd64
