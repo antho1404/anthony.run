@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { Run } from "@/lib/prisma/generated";
-import { execSync } from "child_process";
 
 const CREATE_MACHINE_ENDPOINT =
   "https://api.machines.dev/v1/apps/anthony-run/machines";
@@ -43,38 +42,43 @@ async function createFlyMachine(run: Run) {
     });
 
     const data = await response.json();
-    if (!response.ok) {
+    if (!response.ok)
       return [null, new Error(data.message || "Fly machine error")];
-    }
-    console.log("Monitor at https://fly.io/apps/project-to-name/monitoring");
     return [data.id, null];
   } catch (error) {
     return [null, error];
   }
 }
 
-async function createDockerContainer(run: Run) {
-  try {
-    const output = execSync(
-      `docker run -d --rm \
--e ANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY} \
-anthony.run \
-"${run.repoUrl}" \
-"${run.prompt.replace(/[\"\$`]/g, (m) => `\\${m}`)}" \
-"${run.branch}" \
-"${new URL("/api/runner/webhook", process.env.BASE_APP_URL).toString()}" \
-"${run.id}"`,
-      { stdio: "pipe" }
-    );
-    return [output.toString(), null];
-  } catch (error) {
-    return [null, error];
-  }
-}
+// async function createDockerContainer(run: Run) {
+//   const docker = new Docker();
+
+//   try {
+//     const container = await docker.createContainer({
+//       Image: run.image,
+//       name: run.id,
+//       Env: [`ANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY}`],
+//       Cmd: [
+//         run.repoUrl,
+//         run.prompt,
+//         run.branch,
+//         new URL("/api/runner/webhook", process.env.BASE_APP_URL).toString(),
+//         run.id,
+//       ],
+//       HostConfig: {
+//         AutoRemove: true,
+//       },
+//     });
+//     await container.start();
+//     return [container.id, null];
+//   } catch (error) {
+//     return [null, error];
+//   }
+// }
 
 async function createRunner(run: Run) {
-  if (process.env.NODE_ENV === "development")
-    return await createDockerContainer(run);
+  // if (process.env.NODE_ENV === "development")
+  //   return await createDockerContainer(run);
   return await createFlyMachine(run);
 }
 
@@ -106,10 +110,8 @@ export async function createRun({
 
   const [containerId, error] = await createRunner(run);
 
-  await prisma.run.update({
+  return await prisma.run.update({
     where: { id: run.id },
     data: { error: error?.message, containerId },
   });
-
-  return run;
 }
