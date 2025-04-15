@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+docker-machine/machines/*/ssh
 
 # debug
 npm-debug.log*

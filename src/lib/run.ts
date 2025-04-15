@@ -1,85 +1,44 @@
 import { prisma } from "@/lib/prisma";
 import { Run } from "@/lib/prisma/generated";
+import Docker from "dockerode";
 
-const CREATE_MACHINE_ENDPOINT =
-  "https://api.machines.dev/v1/apps/anthony-run/machines";
-
-async function createFlyMachine(run: Run) {
+async function createDockerContainer(
+  run: Run
+): Promise<[string, null] | [null, Error]> {
+  const docker = new Docker({
+    protocol: "https",
+    host: process.env.DOCKER_HOST,
+    port: 2376,
+    ca: Buffer.from(process.env.DOCKER_CA || "", "base64").toString("utf-8"),
+    cert: Buffer.from(process.env.DOCKER_CERT || "", "base64").toString(
+      "utf-8"
+    ),
+    key: Buffer.from(process.env.DOCKER_KEY || "", "base64").toString("utf-8"),
+  });
   try {
-    const response = await fetch(CREATE_MACHINE_ENDPOINT, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.FLY_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: run.id,
-        region: run.region,
-        config: {
-          image: run.image,
-          env: {
-            ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-          },
-          restart: {
-            max_retries: 1,
-            policy: "no",
-          },
-          init: {
-            cmd: [
-              run.repoUrl,
-              run.prompt,
-              run.branch,
-              new URL(
-                "/api/runner/webhook",
-                process.env.BASE_APP_URL
-              ).toString(),
-              run.id,
-            ],
-          },
-          // auto_destroy: true,
+    const container = await docker.createContainer({
+      Image: run.image,
+      name: run.id,
+      Env: [`ANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY}`],
+      Cmd: [
+        run.repoUrl,
+        run.prompt,
+        run.branch,
+        new URL("/api/runner/webhook", process.env.BASE_APP_URL).toString(),
+        run.id,
+      ],
+      HostConfig: {
+        // AutoRemove: true,
+        RestartPolicy: {
+          Name: "no",
         },
-      }),
+      },
     });
-
-    const data = await response.json();
-    if (!response.ok)
-      return [null, new Error(data.message || "Fly machine error")];
-    return [data.id, null];
-  } catch (error) {
-    return [null, error];
+    await container.start();
+    return [container.id, null];
+  } catch (e) {
+    return [null, e as Error];
   }
-}
-
-// async function createDockerContainer(run: Run) {
-//   const docker = new Docker();
-
-//   try {
-//     const container = await docker.createContainer({
-//       Image: run.image,
-//       name: run.id,
-//       Env: [`ANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY}`],
-//       Cmd: [
-//         run.repoUrl,
-//         run.prompt,
-//         run.branch,
-//         new URL("/api/runner/webhook", process.env.BASE_APP_URL).toString(),
-//         run.id,
-//       ],
-//       HostConfig: {
-//         AutoRemove: true,
-//       },
-//     });
-//     await container.start();
-//     return [container.id, null];
-//   } catch (error) {
-//     return [null, error];
-//   }
-// }
-
-async function createRunner(run: Run) {
-  // if (process.env.NODE_ENV === "development")
-  //   return await createDockerContainer(run);
-  return await createFlyMachine(run);
 }
 
 export async function createRun({
@@ -108,7 +67,7 @@ export async function createRun({
     },
   });
 
-  const [containerId, error] = await createRunner(run);
+  const [containerId, error] = await createDockerContainer(run);
 
   return await prisma.run.update({
     where: { id: run.id },

@@ -26,6 +26,5 @@ model Run {
   containerId    String?
   error          String?
   image          String   @default("ghcr.io/antho1404/anthony.run:latest")
-  region         String   @default("sin")
   createdAt      DateTime @default(now())
 }
