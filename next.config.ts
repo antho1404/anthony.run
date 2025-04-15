@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
   },
   webpack: (config) => {
     config.module.rules.push({
-      test: /\.node$/,
+      test: /sshcrypto\.node$/,
       use: "ignore-loader",
     });
     return config;
