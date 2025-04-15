@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -11,12 +12,10 @@ const nextConfig: NextConfig = {
     ],
   },
   webpack: (config) => {
-    config.externals.push("ssh2");
-    // ssh2;
-    // config.module.rules.push({
-    //   test: /sshcrypto\.node$/,
-    //   use: "ignore-loader",
-    // });
+    config.resolve.alias["ssh2"] = path.join(
+      import.meta.dirname,
+      "ssh2.noop.js"
+    );
     return config;
   },
 };
