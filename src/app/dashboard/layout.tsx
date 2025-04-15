@@ -16,7 +16,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserButton } from "@clerk/nextjs";
 import {
-  CircleAlertIcon,
   FileTextIcon,
   HistoryIcon,
   HomeIcon,
@@ -40,12 +39,6 @@ export default function Dashboard({ children }: PropsWithChildren) {
                   <SidebarMenuButton>
                     <HomeIcon />
                     Home
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <CircleAlertIcon />
-                    Issues
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
