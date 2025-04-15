@@ -10,6 +10,13 @@ const nextConfig: NextConfig = {
       { hostname: "avatars.githubusercontent.com", pathname: "/u/*" },
     ],
   },
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.node$/,
+      use: "ignore-loader",
+    });
+    return config;
+  },
 };
 
 export default nextConfig;

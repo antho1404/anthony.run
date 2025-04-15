@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { Run } from "@/lib/prisma/generated";
-import Docker from "dockerode";
+import "server-only";
 
 async function createDockerContainer(
   run: Run
 ): Promise<[string, null] | [null, Error]> {
+  const Docker = (await import("dockerode")).default;
   const docker = new Docker({
     protocol: "https",
     host: process.env.DOCKER_HOST,
