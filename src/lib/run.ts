@@ -3,7 +3,7 @@ import { Run } from "@/lib/prisma/generated";
 import { execSync } from "child_process";
 
 const CREATE_MACHINE_ENDPOINT =
-  "https://api.machines.dev/v1/apps/project-to-name/machines";
+  "https://api.machines.dev/v1/apps/anthony-run/machines";
 
 async function createFlyMachine(run: Run) {
   try {
@@ -21,6 +21,10 @@ async function createFlyMachine(run: Run) {
           env: {
             ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
           },
+          restart: {
+            max_retries: 1,
+            policy: "no",
+          },
           init: {
             cmd: [
               run.repoUrl,
@@ -33,13 +37,8 @@ async function createFlyMachine(run: Run) {
               run.id,
             ],
           },
-          auto_destroy: true,
+          // auto_destroy: true,
         },
-        // registry: {
-        //   username: "antho1404",
-        //   password: process.env.GITHUB_PAT,
-        //   server: "ghcr.io",
-        // },
       }),
     });
 
