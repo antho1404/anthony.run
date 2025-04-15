@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
     };
   };
 
+  console.log(body.output);
   const run = await prisma.run.update({
     where: { id: body.id },
     data: { output: JSON.stringify(body.output) },
@@ -24,6 +25,17 @@ export async function POST(req: NextRequest) {
   const repoUrl = new URL(run.repoUrl);
   const repoOwner = repoUrl.pathname.split("/")[1];
   const repoName = repoUrl.pathname.split("/")[2];
+  console.log({ repoUrl, repoOwner, repoName });
+  console.log({
+    branch: run.branch,
+    issueNumber: run.issueNumber,
+    repoOwner,
+    repoName,
+    executionId: run.id,
+    installationId: run.installationId,
+    baseRef: "main", // TODO: support other than main
+    content: body.output?.result,
+  });
   await createPullRequest({
     branch: run.branch,
     issueNumber: run.issueNumber,

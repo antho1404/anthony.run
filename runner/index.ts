@@ -57,7 +57,7 @@ async function main({
 
     console.log("Running Claude...");
     const stdio = execSync(
-      `claude --print --json "${prompt}" --allowedTools "Bash(git commit:*),Bash(git add:*),Edit,Write"`,
+      `claude --print --json "${prompt}" --allowedTools "Bash(git commit:*),Bash(git add:*),Bash(git rm:*),Edit,Write"`,
       { stdio: "pipe" }
     );
 
