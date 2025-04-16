@@ -1,5 +1,7 @@
 import { components } from "@octokit/openapi-types";
 
+// TODO: https://cookbook.openai.com/examples/gpt4-1_prompting_guide
+
 export function generatePromptFromIssue(
   issue: components["schemas"]["issue"],
   comments: components["schemas"]["issue-comment"][],
