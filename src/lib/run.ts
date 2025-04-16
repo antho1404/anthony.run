@@ -4,7 +4,6 @@ import { Run } from "@/lib/prisma/generated";
 import { tryCatch } from "@/lib/tryCatch";
 
 export async function createDockerContainer(run: Run) {
-  console.log("create docker container", run.id);
   const id = await createContainer({
     image: run.image,
     name: run.id,
@@ -18,8 +17,6 @@ export async function createDockerContainer(run: Run) {
     ],
   });
 
-  console.log("created docker container", id);
-  console.log("start docker container");
   await startContainer(id);
   return id;
 }

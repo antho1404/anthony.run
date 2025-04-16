@@ -28,7 +28,7 @@ export default async function Dashboard() {
       icon: CircleAlertIcon,
       title: "Solve an Issue",
       description: "Fix problems in your projects",
-      link: "/dashboard/issues",
+      link: "/dashboard/runs/create",
     },
     {
       icon: HistoryIcon,

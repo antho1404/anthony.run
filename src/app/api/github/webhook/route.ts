@@ -23,32 +23,40 @@ export async function POST(req: NextRequest) {
 
   const event = headersPayload.get("x-github-event");
 
-  if (event === "installation")
-    await handleInstallationEvent(
-      JSON.parse(rawBody) as Event<
-        "installation-created" | "installation-deleted"
-      >
-    );
+  try {
+    if (event === "installation")
+      await handleInstallationEvent(
+        JSON.parse(rawBody) as Event<
+          "installation-created" | "installation-deleted"
+        >
+      );
 
-  if (
-    event === "issues" ||
-    event === "issues-opened" ||
-    event === "issues-edited"
-  )
-    await handleIssueEvent(
-      JSON.parse(rawBody) as Event<"issues-opened" | "issues-edited">
-    );
+    if (
+      event === "issues" ||
+      event === "issues-opened" ||
+      event === "issues-edited"
+    )
+      await handleIssueEvent(
+        JSON.parse(rawBody) as Event<"issues-opened" | "issues-edited">
+      );
 
-  if (
-    event === "issue_comment" ||
-    event === "issue-comment-created" ||
-    event === "issue-comment-edited"
-  )
-    await handleIssueCommentEvent(
-      JSON.parse(rawBody) as Event<
-        "issue-comment-created" | "issue-comment-edited"
-      >
-    );
+    if (
+      event === "issue_comment" ||
+      event === "issue-comment-created" ||
+      event === "issue-comment-edited"
+    )
+      await handleIssueCommentEvent(
+        JSON.parse(rawBody) as Event<
+          "issue-comment-created" | "issue-comment-edited"
+        >
+      );
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error processing webhook:", error);
+    return NextResponse.json(
+      { error: "Failed to process webhook" },
+      { status: 500 }
+    );
+  }
 }
