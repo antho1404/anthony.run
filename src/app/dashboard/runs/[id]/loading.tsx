@@ -17,9 +17,9 @@ export default async function Loader() {
             <GithubIcon className="h-4 w-4" />
             <Skeleton className="h-8 w-96" />
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             <Skeleton className="size-5 w-12" />
-          </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
