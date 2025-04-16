@@ -31,6 +31,16 @@ import { PropsWithChildren, Suspense } from "react";
 export default async function Dashboard({ children }: PropsWithChildren) {
   return (
     <ClientProvider>
+      <div className="fixed inset-0 z-[-1]">
+        <div 
+          className="size-full animate-aurora"
+          style={{
+            backgroundImage: 'linear-gradient(135deg, #FF0080, #7928CA, #0070F3, #38bdf8, #0070F3, #7928CA)',
+            backgroundSize: '400% 400%',
+            opacity: 0.1,
+          }}
+        ></div>
+      </div>
       <SidebarProvider>
         <Sidebar variant="inset" collapsible="offcanvas">
           <SidebarHeader className="text-lg font-semibold pl-10 flex flex-row">

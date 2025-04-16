@@ -1,6 +1,14 @@
 export function GridBackground() {
   return (
     <div className="absolute inset-0">
+      <div 
+        className="size-full animate-aurora"
+        style={{
+          backgroundImage: 'linear-gradient(135deg, #FF0080, #7928CA, #0070F3, #38bdf8, #0070F3, #7928CA)',
+          backgroundSize: '400% 400%',
+          opacity: 0.15,
+        }}
+      ></div>
       <div className="size-full bg-radial from-muted/80 to-muted/0"></div>
       <div className="grid grid-cols-12 grid-rows-12 pointer-events-none">
         {Array.from({ length: 13 }).map((_, i) => (
