@@ -16,6 +16,13 @@ export async function POST(req: NextRequest) {
     };
   };
 
+  if (body.error) {
+    await prisma.run.update({
+      where: { id: body.id },
+      data: { error: body.error },
+    });
+    return NextResponse.json({ success: true });
+  }
   const run = await prisma.run.update({
     where: { id: body.id },
     data: { output: JSON.stringify(body.output) },
