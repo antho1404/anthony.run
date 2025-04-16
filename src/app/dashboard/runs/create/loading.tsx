@@ -1,9 +1,15 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CreateRunLoading() {
   return (
-    <div className="max-w-2xl mx-auto py-6">
+    <div className="max-w-2xl w-full mx-auto py-6">
       <Card>
         <CardHeader>
           <CardTitle>Create New Run</CardTitle>
