@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     issueNumber: run.issueNumber,
     repoOwner,
     repoName,
-    executionId: run.id,
+    runId: run.id,
     installationId: run.installationId,
     baseRef: "main", // TODO: support other than main
     content: body.output?.result,

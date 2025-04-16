@@ -1,10 +1,13 @@
 import { Brandmark } from "@/components/brandmark";
+import RunList from "@/components/run-list";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -17,37 +20,35 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { UserButton } from "@clerk/nextjs";
 import {
   FileTextIcon,
-  HistoryIcon,
-  HomeIcon,
   MessageSquareIcon,
+  PlusIcon,
   SettingsIcon,
 } from "lucide-react";
-import { PropsWithChildren } from "react";
+import Link from "next/link";
+import { PropsWithChildren, Suspense } from "react";
 
-export default function Dashboard({ children }: PropsWithChildren) {
+export default async function Dashboard({ children }: PropsWithChildren) {
   return (
     <SidebarProvider>
       <Sidebar variant="inset" collapsible="offcanvas">
         <SidebarHeader className="text-lg font-semibold pl-10 flex flex-row">
-          <Brandmark />
+          <Link href="/dashboard">
+            <Brandmark />
+          </Link>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
+            <Button size="lg" asChild className="w-full">
+              <Link href="/dashboard/runs">
+                <PlusIcon className="size-4" />
+                New Run
+              </Link>
+            </Button>
+            <SidebarGroupLabel className="mt-4">Runs</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <HomeIcon />
-                    Home
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <HistoryIcon />
-                    History
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
+              <Suspense>
+                <RunList />
+              </Suspense>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
