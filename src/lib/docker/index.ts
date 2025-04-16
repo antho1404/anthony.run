@@ -20,7 +20,6 @@ export async function createContainer(opts: {
   cmd: string[];
   env: string[];
 }) {
-  console.log("  fetch");
   const response = await fetch(
     `${dockerUrl}/containers/create?name=${opts.name}`,
     {
@@ -42,29 +41,17 @@ export async function createContainer(opts: {
       }),
     }
   );
-  console.log("  parse");
   const data = (await response.json()) as { message: string } | { Id: string };
-  console.log("  check message");
   if ("message" in data) throw new Error(data.message);
-  console.log("  check response");
   if (!response.ok) throw new Error("Unknown error");
-  console.log("  all good");
   return data.Id;
 }
 
 export async function startContainer(id: string) {
-  console.log("  fetch");
-  const response = await fetch(`${dockerUrl}/containers/${id}/start`, {
+  await fetch(`${dockerUrl}/containers/${id}/start`, {
     agent: agent(),
     method: "POST",
   });
-  console.log("  parse");
-  const data = (await response.json()) as { message: string } | object;
-  console.log("  check message");
-  if ("message" in data) throw new Error(data.message);
-  console.log("  check response");
-  if (!response.ok) throw new Error("Unknown error");
-  console.log("  all good");
   return id;
 }
 
