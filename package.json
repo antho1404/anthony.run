@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev --turbopack\" \"ngrok http --subdomain project-to-name 3000\" \"prisma studio --browser none\"",
+    "dev": "concurrently \"next dev --turbopack\" \"ngrok http --subdomain project-to-name 3000\" \"prisma studio --browser none\" --names \"nextjs,ngrok,prisma\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
