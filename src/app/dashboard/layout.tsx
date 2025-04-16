@@ -14,6 +14,10 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { getUserSubscription } from "@/lib/stripe/subscription";
+import { STRIPE_PLANS } from "@/lib/stripe";
+import { auth } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
 import {
   FileTextIcon,
@@ -21,10 +25,18 @@ import {
   HomeIcon,
   MessageSquareIcon,
   SettingsIcon,
+  CreditCardIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { PropsWithChildren } from "react";
 
-export default function Dashboard({ children }: PropsWithChildren) {
+export default async function Dashboard({ children }: PropsWithChildren) {
+  const { userId } = auth();
+  const subscription = userId ? await getUserSubscription(userId) : null;
+  const planName = subscription?.plan 
+    ? STRIPE_PLANS[subscription.plan].name 
+    : 'Free';
+
   return (
     <SidebarProvider>
       <Sidebar variant="inset" collapsible="offcanvas">
@@ -36,16 +48,31 @@ export default function Dashboard({ children }: PropsWithChildren) {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <HomeIcon />
-                    Home
-                  </SidebarMenuButton>
+                  <Link href="/dashboard">
+                    <SidebarMenuButton>
+                      <HomeIcon />
+                      Home
+                    </SidebarMenuButton>
+                  </Link>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <HistoryIcon />
-                    History
-                  </SidebarMenuButton>
+                  <Link href="/dashboard/history">
+                    <SidebarMenuButton>
+                      <HistoryIcon />
+                      History
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <Link href="/dashboard/settings">
+                    <SidebarMenuButton>
+                      <CreditCardIcon />
+                      Subscription
+                      <Badge variant="outline" className="ml-2">
+                        {planName}
+                      </Badge>
+                    </SidebarMenuButton>
+                  </Link>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
@@ -56,22 +83,28 @@ export default function Dashboard({ children }: PropsWithChildren) {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <FileTextIcon />
-                    Documentation
-                  </SidebarMenuButton>
+                  <Link href="/documentation">
+                    <SidebarMenuButton>
+                      <FileTextIcon />
+                      Documentation
+                    </SidebarMenuButton>
+                  </Link>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <SettingsIcon />
-                    Settings
-                  </SidebarMenuButton>
+                  <Link href="/dashboard/settings">
+                    <SidebarMenuButton>
+                      <SettingsIcon />
+                      Settings
+                    </SidebarMenuButton>
+                  </Link>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton>
-                    <MessageSquareIcon />
-                    Feedback
-                  </SidebarMenuButton>
+                  <Link href="/feedback">
+                    <SidebarMenuButton>
+                      <MessageSquareIcon />
+                      Feedback
+                    </SidebarMenuButton>
+                  </Link>
                 </SidebarMenuItem>
                 <UserButton
                   appearance={{

@@ -27,4 +27,46 @@ model Run {
   error          String?
   image          String   @default("ghcr.io/antho1404/anthony.run:latest")
   createdAt      DateTime @default(now())
+  user           User?    @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id                String         @id
+  email             String         @unique
+  stripeCustomerId  String?        @unique
+  subscription      Subscription?
+  runs              Run[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model Subscription {
+  id                String         @id @default(cuid())
+  userId            String         @unique
+  stripeSubscriptionId String      @unique
+  status            SubscriptionStatus
+  plan              SubscriptionPlan
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean       @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  PAUSED
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+  ENTERPRISE
 }
