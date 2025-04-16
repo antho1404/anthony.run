@@ -1,14 +1,16 @@
 "use client";
 
+import { createRunAction } from "@/app/actions/run";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -16,99 +18,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-
-type Repository = {
-  id: number;
-  name: string;
-  full_name: string;
-};
-
-type Account = {
-  id: number;
-  login: string;
-};
-
-type InstallationWithRepos = {
-  installationId: number;
-  account: Account;
-  repositories: Repository[];
-};
-
-type Issue = {
-  id: number;
-  number: number;
-  title: string;
-  html_url: string;
-};
+import { useState } from "react";
 
 export default function CreateRunPage() {
-  const router = useRouter();
-  
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [installationsWithRepos, setInstallationsWithRepos] = useState<InstallationWithRepos[]>([]);
   const [selectedRepo, setSelectedRepo] = useState<string>("");
-  const [selectedInstallationId, setSelectedInstallationId] = useState<number | null>(null);
-  const [issues, setIssues] = useState<Issue[]>([]);
+  const [selectedInstallationId, setSelectedInstallationId] = useState<
+    number | null
+  >(null);
   const [selectedIssue, setSelectedIssue] = useState<number | null>(null);
-  const [issuesLoading, setIssuesLoading] = useState(false);
 
-  // Fetch installations and repositories
-  useEffect(() => {
-    async function fetchInstallationsWithRepos() {
-      setLoading(true);
-      try {
-        const response = await fetch("/api/github/installations");
-        if (!response.ok) throw new Error("Failed to fetch installations");
-        const data = await response.json();
-        setInstallationsWithRepos(data);
-      } catch (error) {
-        console.error("Error fetching installations:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
+  const installations = useQuery({
+    queryKey: ["installationsWithRepos"],
+    queryFn: async () => {
+      const response = await fetch("/api/github/installations");
+      if (!response.ok) throw new Error("Failed to fetch installations");
+      const data = await response.json();
+      return data as {
+        installationId: number;
+        repositories: { id: number; full_name: string }[];
+      }[];
+    },
+  });
 
-    fetchInstallationsWithRepos();
-  }, []);
-
-  // Fetch issues when a repository is selected
-  useEffect(() => {
-    if (!selectedRepo || !selectedInstallationId) {
-      setIssues([]);
-      return;
-    }
-
-    async function fetchIssues() {
-      setIssuesLoading(true);
-      try {
-        const response = await fetch(
-          `/api/github/issues?repo=${encodeURIComponent(selectedRepo)}&installationId=${selectedInstallationId}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch issues");
-        const data = await response.json();
-        setIssues(data.issues);
-      } catch (error) {
-        console.error("Error fetching issues:", error);
-      } finally {
-        setIssuesLoading(false);
-      }
-    }
-
-    fetchIssues();
-  }, [selectedRepo, selectedInstallationId]);
+  const issues = useQuery({
+    queryKey: ["issues", selectedRepo, selectedInstallationId],
+    queryFn: async () => {
+      if (!selectedRepo || !selectedInstallationId) return [];
+      const response = await fetch(
+        `/api/github/issues?repo=${encodeURIComponent(
+          selectedRepo
+        )}&installationId=${selectedInstallationId}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch issues");
+      const data = await response.json();
+      return data.issues as { id: number; number: number; title: string }[];
+    },
+    enabled: !!selectedRepo && !!selectedInstallationId,
+  });
 
   const handleRepoChange = (value: string) => {
     setSelectedRepo(value);
     setSelectedIssue(null);
-    
-    // Find the installation ID for the selected repo
-    for (const installation of installationsWithRepos) {
-      const repo = installation.repositories.find(r => r.full_name === value);
+    for (const installation of installations.data || []) {
+      const repo = installation.repositories.find((r) => r.full_name === value);
       if (repo) {
         setSelectedInstallationId(installation.installationId);
         break;
@@ -120,38 +74,19 @@ export default function CreateRunPage() {
     setSelectedIssue(Number(value));
   };
 
-  const handleSubmit = async () => {
-    if (!selectedRepo || !selectedInstallationId || !selectedIssue) return;
-
-    setSubmitting(true);
-    try {
-      const response = await fetch("/api/runs/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          repoFullName: selectedRepo,
-          installationId: selectedInstallationId,
-          issueNumber: selectedIssue,
-        }),
+  const createRun = useMutation({
+    mutationFn: async () => {
+      if (!selectedRepo || !selectedInstallationId || !selectedIssue) return;
+      return await createRunAction({
+        installationId: selectedInstallationId,
+        issueNumber: selectedIssue,
+        repoFullName: selectedRepo,
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to create run");
-      }
-
-      const data = await response.json();
-      router.push(`/dashboard/runs/${data.runId}`);
-    } catch (error) {
-      console.error("Error creating run:", error);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    },
+  });
 
   return (
-    <div className="max-w-2xl mx-auto py-6">
+    <div className="max-w-2xl w-full mx-auto py-6">
       <Card>
         <CardHeader>
           <CardTitle>Create New Run</CardTitle>
@@ -160,67 +95,59 @@ export default function CreateRunPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="repository">Repository</Label>
-                <Select value={selectedRepo} onValueChange={handleRepoChange}>
-                  <SelectTrigger id="repository" className="w-full">
-                    <SelectValue placeholder="Select a repository" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {installationsWithRepos.map((installation) => (
-                      <div key={installation.installationId}>
-                        {installation.repositories.map((repo) => (
-                          <SelectItem key={repo.id} value={repo.full_name}>
-                            {repo.full_name}
-                          </SelectItem>
-                        ))}
-                      </div>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="issue">Issue</Label>
-                <Select
-                  value={selectedIssue ? String(selectedIssue) : ""}
-                  onValueChange={handleIssueChange}
-                  disabled={!selectedRepo || issuesLoading}
-                >
-                  <SelectTrigger id="issue" className="w-full">
-                    {issuesLoading ? (
-                      <div className="flex items-center">
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Loading issues...
-                      </div>
-                    ) : (
-                      <SelectValue placeholder="Select an issue" />
-                    )}
-                  </SelectTrigger>
-                  <SelectContent>
-                    {issues.map((issue) => (
-                      <SelectItem key={issue.id} value={String(issue.number)}>
-                        #{issue.number} {issue.title}
+          <div className="space-y-2">
+            <Label htmlFor="repository">Repository</Label>
+            <Select value={selectedRepo} onValueChange={handleRepoChange}>
+              <SelectTrigger id="repository" className="w-full">
+                <SelectValue placeholder="Select a repository" />
+              </SelectTrigger>
+              <SelectContent>
+                {(installations.data || []).map((installation) => (
+                  <div key={installation.installationId}>
+                    {installation.repositories.map((repo) => (
+                      <SelectItem key={repo.id} value={repo.full_name}>
+                        {repo.full_name}
                       </SelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
-          )}
+                  </div>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="issue">Issue</Label>
+            <Select
+              value={selectedIssue ? String(selectedIssue) : ""}
+              onValueChange={handleIssueChange}
+              disabled={!selectedRepo || issues.isLoading}
+            >
+              <SelectTrigger id="issue" className="w-full">
+                {issues.isLoading ? (
+                  <div className="flex items-center">
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Loading issues...
+                  </div>
+                ) : (
+                  <SelectValue placeholder="Select an issue" />
+                )}
+              </SelectTrigger>
+              <SelectContent>
+                {(issues.data || []).map((issue) => (
+                  <SelectItem key={issue.id} value={String(issue.number)}>
+                    #{issue.number} {issue.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-end">
           <Button
-            onClick={handleSubmit}
-            disabled={!selectedRepo || !selectedIssue || submitting}
+            onClick={() => createRun.mutate()}
+            disabled={!selectedRepo || !selectedIssue || createRun.isPending}
           >
-            {submitting ? (
+            {createRun.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Creating Run...
