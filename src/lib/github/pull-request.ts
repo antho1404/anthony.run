@@ -1,3 +1,4 @@
+import { tryCatch } from "@/lib/tryCatch";
 import { Octokit } from "@octokit/core";
 import { getInstallationToken } from "./index";
 
@@ -8,7 +9,7 @@ export async function createPullRequest({
   repoName,
   branch,
   baseRef = "main",
-  executionId,
+  runId,
   content,
 }: {
   installationId: number;
@@ -17,7 +18,7 @@ export async function createPullRequest({
   repoName: string;
   branch: string;
   baseRef?: string;
-  executionId: string;
+  runId: string;
   content: string;
 }) {
   const token = await getInstallationToken(installationId);
@@ -38,7 +39,7 @@ export async function createPullRequest({
     body: `${content}
 
 ## Result
-View the execution result: https://anthony.run/dashboard/execution/${executionId}
+View the execution result: https://anthony.run/dashboard/runs/${runId}
 
 Closes #${issueNumber}`,
     draft: false,
@@ -46,8 +47,8 @@ Closes #${issueNumber}`,
   });
 
   // Try to assign the PR to the repo owner
-  try {
-    await octokit.request(
+  await tryCatch(
+    octokit.request(
       "POST /repos/{owner}/{repo}/issues/{issue_number}/assignees",
       {
         owner: repoOwner,
@@ -55,10 +56,8 @@ Closes #${issueNumber}`,
         issue_number: response.data.number,
         assignees: [repoOwner],
       }
-    );
-  } catch {
-    // Continue even if assignment fails
-  }
+    )
+  );
 
   return response.data;
 }
