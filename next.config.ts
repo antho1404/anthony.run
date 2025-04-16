@@ -12,7 +12,14 @@ const nextConfig: NextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
-    if (isServer) config.resolve.alias["ssh2"] = path.resolve("./ssh2.noop.js");
+    config.externals = config.externals || [];
+    config.externals.push("ssh2");
+
+    if (isServer)
+      config.resolve.alias["docker-modem/lib/ssh.js"] = path.resolve(
+        __dirname,
+        "ssh2.noop.js"
+      );
 
     return config;
   },
