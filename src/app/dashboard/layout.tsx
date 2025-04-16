@@ -39,7 +39,7 @@ export default async function Dashboard({ children }: PropsWithChildren) {
         <SidebarContent>
           <SidebarGroup>
             <Button size="lg" asChild className="w-full">
-              <Link href="/dashboard/runs">
+              <Link href="/dashboard/runs/create">
                 <PlusIcon className="size-4" />
                 New Run
               </Link>
