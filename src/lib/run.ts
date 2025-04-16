@@ -2,6 +2,7 @@ import { createContainer, startContainer } from "@/lib/docker";
 import { prisma } from "@/lib/prisma";
 import { Run } from "@/lib/prisma/generated";
 import { tryCatch } from "@/lib/tryCatch";
+import { isUserSubscribed } from "./stripe/subscription";
 
 export async function createDockerContainer(run: Run) {
   const id = await createContainer({
@@ -36,6 +37,32 @@ export async function createRun({
   installationId: number;
   userId: string;
 }) {
+  // Check if user is subscribed or has reached free tier limits
+  const isSubscribed = await isUserSubscribed(userId);
+  
+  if (!isSubscribed) {
+    // For free tier users, check run count
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    
+    const runCount = await prisma.run.count({
+      where: {
+        userId,
+        createdAt: {
+          gte: monthStart,
+        },
+      },
+    });
+    
+    // Free tier limit (3 runs per month)
+    const FREE_TIER_LIMIT = 3;
+    
+    if (runCount >= FREE_TIER_LIMIT) {
+      throw new Error('Free tier limit reached. Please upgrade your subscription to continue.');
+    }
+  }
+  
   const run = await prisma.run.create({
     data: {
       branch,
