@@ -2,7 +2,6 @@ import { findUserByGithubId, getIssueDetails, getRepoUrl } from "@/lib/github";
 import { Event } from "@/lib/github/type";
 import { generatePromptFromIssue } from "@/lib/prompt";
 import { createRun } from "@/lib/run";
-import { NextResponse } from "next/server";
 import { invariant } from "ts-invariant";
 
 const command = "@anthony.run";
@@ -15,12 +14,12 @@ export async function handleIssueEvent(
   return await processIssueOrComment(payload);
 }
 
-export function handleIssueCommentEvent(
+export async function handleIssueCommentEvent(
   payload: Event<"issue-comment-created" | "issue-comment-edited">
 ) {
   if (!canProcessIssue(payload)) return;
   if (!payload.comment.body?.includes(command)) return;
-  return processIssueOrComment(payload);
+  return await processIssueOrComment(payload);
 }
 
 function canProcessIssue({
@@ -39,37 +38,32 @@ function canProcessIssue({
   return true;
 }
 
-async function processIssueOrComment(
-  payload: Event<
-    | "issues-opened"
-    | "issues-edited"
-    | "issue-comment-created"
-    | "issue-comment-edited"
-  >
-) {
+export async function processIssueOrComment(payload: {
+  issue: { number: number };
+  repository: { id: number };
+  installation?: { id: number };
+  sender: { id: number };
+}) {
   invariant(payload.installation);
 
   const user = await findUserByGithubId(payload.sender.id);
-  if (!user) return NextResponse.json({ success: true });
+  if (!user) throw new Error("User not found");
 
   const issueDetails = await getIssueDetails(
     payload.repository.id,
     payload.issue.number,
     payload.installation.id
   );
-  if (!issueDetails) return NextResponse.json({ success: true });
+  if (!issueDetails) throw new Error("Issue not found");
 
   const repoUrl = await getRepoUrl(
     payload.repository.id,
     payload.installation.id
   );
-  if (!repoUrl) {
-    console.log(`Repository with ID ${payload.repository.id} not found`);
-    return NextResponse.json({ success: true });
-  }
+  if (!repoUrl) throw new Error("Repository not found");
 
   // Create branch name from issue title
-  const branchName = `issue-${payload.issue.number}-${payload.issue.title
+  const branchName = `issue-${payload.issue.number}-${issueDetails.issue.title
     .toLowerCase()
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, "-")
@@ -85,7 +79,7 @@ async function processIssueOrComment(
   );
 
   // Run the task with the generated prompt
-  await createRun({
+  const run = await createRun({
     repoUrl,
     prompt,
     branch: branchName,
@@ -94,5 +88,5 @@ async function processIssueOrComment(
     userId: user?.id,
   });
 
-  return NextResponse.json({ success: true });
+  return run;
 }
