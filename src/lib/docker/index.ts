@@ -56,3 +56,38 @@ export async function startContainer(id: string) {
   if (!response.ok) throw new Error("Unknown error");
   return id;
 }
+
+export async function getContainerLogs(id: string) {
+  const response = await fetch(
+    `${dockerUrl}/containers/${id}/logs?stdout=true&stderr=true&timestamps=true`,
+    {
+      agent: agent(),
+      method: "GET",
+    }
+  );
+  
+  if (!response.ok) {
+    const data = (await response.json()) as { message: string } | object;
+    if ("message" in data) throw new Error(data.message);
+    throw new Error("Unknown error");
+  }
+  
+  const text = await response.text();
+  return text;
+}
+
+export async function isContainerRunning(id: string) {
+  try {
+    const response = await fetch(`${dockerUrl}/containers/${id}/json`, {
+      agent: agent(),
+      method: "GET",
+    });
+    
+    if (!response.ok) return false;
+    
+    const data = await response.json() as { State: { Running: boolean } };
+    return data.State.Running;
+  } catch (error) {
+    return false;
+  }
+}

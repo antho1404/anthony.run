@@ -32,9 +32,9 @@ export default async function Dashboard() {
     },
     {
       icon: HistoryIcon,
-      title: "History",
-      description: "View your past activities",
-      link: "/dashboard/history",
+      title: "Execution Runs",
+      description: "View your execution history",
+      link: "/dashboard/runs",
     },
     {
       icon: SlidersIcon,
