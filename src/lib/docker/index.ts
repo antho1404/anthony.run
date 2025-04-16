@@ -48,13 +48,10 @@ export async function createContainer(opts: {
 }
 
 export async function startContainer(id: string) {
-  const response = await fetch(`${dockerUrl}/containers/${id}/start`, {
+  await fetch(`${dockerUrl}/containers/${id}/start`, {
     agent: agent(),
     method: "POST",
   });
-  const data = (await response.json()) as { message: string } | object;
-  if ("message" in data) throw new Error(data.message);
-  if (!response.ok) throw new Error("Unknown error");
   return id;
 }
 
