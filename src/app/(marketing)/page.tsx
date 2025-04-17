@@ -51,7 +51,7 @@ export default function Home() {
       </p>
 
       <p className="text-lg md:text-xl text-muted-foreground max-w-xl mt-4">
-        Tag <span className="font-semibold italic">@anthony.run</span> on your
+        Tag <span className="font-semibold italic">@anthony-run</span> on your
         GitHub issue and get a pull request ready to review and merge.
       </p>
 

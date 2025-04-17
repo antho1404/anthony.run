@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# anthony • run
 
-## Getting Started
+Turn GitHub issues into working code — automatically.
 
-First, run the development server:
+Built for devs who want to move fast, stay focused, and spend less time grinding through tickets. Our tool connects directly to your repo and transforms your GitHub issues into real pull requests using AI, so you can review and ship instead of rewrite and stress.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+👉 [Try it out at anthony.run](https://anthony.run)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Vision
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+We're on a mission to **eliminate unresolved GitHub issues** and cut up to **90% of development effort** for repetitive tasks and feature requests.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Instead of spending hours fixing bugs or wiring up simple features, let the AI do the first pass. You stay in control — reviewing, refining, and shipping.
 
-## Learn More
+We’re not replacing devs. We’re making them 10x faster.
 
-To learn more about Next.js, take a look at the following resources:
+## 👥 Who's this for?
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Right now, we're building for:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Solo devs ⚡️
+- Indie hackers 🛠️
+- Startup teams 🚀
 
-## Deploy on Vercel
+But the system is designed to grow with your project — from a weekend idea to full-scale production.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🧪 How it works (under the hood)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Connect your GitHub repo** — we’ll spin up a temporary clone.
+2. **Select an issue** — from the dashboard or by mentionning **@anthony-run** in a comment.
+3. **The AI reads, thinks, and codes** — based on the issue, your codebase, and project context.
+4. **You get a PR** — with detailed changes and explanation.
+
+You review → merge or tweak → done.
+
+We use an AI agent in a secure, sandboxed job runner. Your code never leaves the system unless you're shipping it.
+
+## ✨ What's new here?
+
+We’re not just throwing code suggestions in your editor like Copilot. We’re solving the entire issue, end to end.
+
+- ✅ Natural language issues → real PRs
+- ✅ Secure, isolated environment per job
+- ✅ AI agent understands your repo structure
+- ✅ Focus on high-value tasks like review + QA
+
+## 🧠 Why we built this
+
+We love building — not managing endless tickets.  
+Our goal is to **help teams move faster** by automating the repetitive stuff so developers can **focus on things that matter**: architecture, testing, performance, and innovation.
+
+## 💬 Feedback?
+
+We're building in public.  
+Got thoughts, use cases, or feature requests? Reach out via [anthony.run](https://anthony.run).
