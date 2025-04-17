@@ -1,4 +1,5 @@
 import ContainerLogs from "@/components/logs";
+import { Toolbar, ToolbarAction, ToolbarTitle } from "@/components/toolbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,25 +42,19 @@ export default async function RunDetailsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-bold truncate flex items-center gap-2">
-            <GithubIcon className="h-4 w-4" />
-            {repoName} #{run.issueNumber}
-            {run.error ? (
-              <Badge variant="destructive">Error</Badge>
-            ) : run.output ? (
-              <Badge>Success</Badge>
-            ) : (
-              <Badge variant="outline">Processing</Badge>
-            )}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {format(new Date(run.createdAt), "PPpp")}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
+      <Toolbar>
+        <ToolbarTitle description={format(new Date(run.createdAt), "PPpp")}>
+          <GithubIcon className="h-4 w-4" />
+          {repoName} #{run.issueNumber}
+          {run.error ? (
+            <Badge variant="destructive">Error</Badge>
+          ) : run.output ? (
+            <Badge>Success</Badge>
+          ) : (
+            <Badge variant="outline">Processing</Badge>
+          )}
+        </ToolbarTitle>
+        <ToolbarAction>
           <Button size="sm" variant="outline" asChild>
             <a
               href={issueUrl}
@@ -72,8 +67,8 @@ export default async function RunDetailsPage({
               <ExternalLinkIcon className="h-3 w-3" />
             </a>
           </Button>
-        </div>
-      </div>
+        </ToolbarAction>
+      </Toolbar>
 
       <Card>
         <CardHeader>
