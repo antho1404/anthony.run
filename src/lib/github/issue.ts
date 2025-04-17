@@ -4,13 +4,14 @@ import { generatePromptFromIssue } from "@/lib/prompt";
 import { createRun } from "@/lib/run";
 import { invariant } from "ts-invariant";
 
-const command = "@anthony.run";
+// @anthony-run, @anthony.run, @anthony•run
+const commandRegex = /@anthony[-\.•]run/;
 
 export async function handleIssueEvent(
   payload: Event<"issues-opened" | "issues-edited">
 ) {
   if (!canProcessIssue(payload)) return;
-  if (!payload.issue.body?.includes(command)) return;
+  if (!payload.issue.body?.match(commandRegex)) return;
   return await processIssueOrComment(payload);
 }
 
@@ -18,7 +19,7 @@ export async function handleIssueCommentEvent(
   payload: Event<"issue-comment-created" | "issue-comment-edited">
 ) {
   if (!canProcessIssue(payload)) return;
-  if (!payload.comment.body?.includes(command)) return;
+  if (!payload.comment.body?.match(commandRegex)) return;
   return await processIssueOrComment(payload);
 }
 
