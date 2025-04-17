@@ -25,9 +25,9 @@ async function main({
     console.log("Checking out branch...");
     execSync(`git checkout -b ${branch}`, { stdio: "inherit" });
 
-    console.log("Running Claude...");
+    console.log("Running Agent...");
     const stdio = execSync(
-      `claude --print --json "${prompt}" --allowedTools "Bash(git commit:*),Bash(git add:*),Bash(git rm:*),Edit,Write"`,
+      `claude --print --output-format json "${prompt}" --allowedTools "Bash(git commit:*),Bash(git add:*),Bash(git rm:*),Edit,Write"`,
       { stdio: "pipe" }
     );
 
