@@ -1,7 +1,13 @@
-import { findUserByGithubId, getIssueDetails, getRepoUrl } from "@/lib/github";
+import {
+  findUserByGithubId,
+  getInstallationToken,
+  getIssueDetails,
+  getRepoUrl,
+} from "@/lib/github";
 import { Event } from "@/lib/github/type";
 import { generatePromptFromIssue } from "@/lib/prompt";
 import { createRun } from "@/lib/run";
+import { Octokit } from "@octokit/core";
 import { invariant } from "ts-invariant";
 
 // @anthony-run, @anthony.run, @anthony•run
@@ -90,4 +96,26 @@ export async function processIssueOrComment(payload: {
   });
 
   return run;
+}
+
+export async function getRepoIssues({
+  installationId,
+  repoFullName,
+}: {
+  installationId: number;
+  repoFullName: string;
+}) {
+  const token = await getInstallationToken(Number(installationId));
+  const octokit = new Octokit({ auth: token });
+
+  const [owner, repo] = repoFullName.split("/");
+
+  const response = await octokit.request("GET /repos/{owner}/{repo}/issues", {
+    owner,
+    repo,
+    state: "open",
+    per_page: 100,
+  });
+
+  return response.data.filter((issue) => !issue.pull_request);
 }

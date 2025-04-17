@@ -1,3 +1,4 @@
+import RunFormSkeleton from "@/app/dashboard/runs/create/form-skeleton";
 import {
   Card,
   CardContent,
@@ -5,11 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CreateRunLoading() {
   return (
-    <div className="max-w-2xl w-full mx-auto py-6">
+    <div className="max-w-2xl w-full mx-auto pt-12">
       <Card>
         <CardHeader>
           <CardTitle>Create New Run</CardTitle>
@@ -17,18 +17,8 @@ export default function CreateRunLoading() {
             Select a repository and issue to start a new run
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-12" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-          <div className="flex justify-end">
-            <Skeleton className="h-10 w-32" />
-          </div>
+        <CardContent>
+          <RunFormSkeleton />
         </CardContent>
       </Card>
     </div>

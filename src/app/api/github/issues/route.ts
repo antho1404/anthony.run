@@ -1,35 +1,37 @@
-import { getInstallationToken } from "@/lib/github";
-import { auth } from "@clerk/nextjs/server";
-import { Octokit } from "@octokit/core";
+import { getAccountRepositoriesByInstallationIds } from "@/lib/github";
+import { getRepoIssues } from "@/lib/github/issue";
+import { currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) return new Response("Unauthorized", { status: 401 });
+  const user = await currentUser();
+  if (!user) return new Response("Unauthorized", { status: 401 });
 
   const searchParams = req.nextUrl.searchParams;
   const repoFullName = searchParams.get("repo");
-  const installationId = searchParams.get("installationId");
 
-  if (!repoFullName || !installationId)
+  if (!repoFullName)
     return NextResponse.json(
       { error: "Missing required parameters" },
       { status: 400 }
     );
 
-  const token = await getInstallationToken(Number(installationId));
-  const octokit = new Octokit({ auth: token });
+  const installations = await getAccountRepositoriesByInstallationIds(
+    user?.privateMetadata.githubInstallationIds || []
+  );
+  const installation = installations.find((i) =>
+    i.repositories.find((r) => r.full_name === repoFullName)
+  );
 
-  const [owner, repo] = repoFullName.split("/");
+  if (!installation)
+    return NextResponse.json(
+      { error: "Installation not found" },
+      { status: 404 }
+    );
 
-  const response = await octokit.request("GET /repos/{owner}/{repo}/issues", {
-    owner,
-    repo,
-    state: "open",
-    per_page: 100,
+  const issues = await getRepoIssues({
+    installationId: installation.installationId,
+    repoFullName,
   });
-
-  const issues = response.data.filter((issue) => !issue.pull_request);
-
   return NextResponse.json({ issues });
 }
