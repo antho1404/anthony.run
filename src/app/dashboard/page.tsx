@@ -21,7 +21,7 @@ export default async function Dashboard() {
       title: "Connect GitHub",
       description: "Link your repositories",
       link: `https://github.com/apps/${
-        process.env.GITHUB_APP_NAME || ""
+        process.env.NEXT_PUBLIC_GITHUB_APP_NAME || ""
       }/installations/select_target`,
     },
     {

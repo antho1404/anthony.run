@@ -20,7 +20,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { useQuery } from "@tanstack/react-query";
-import { GithubIcon, Loader2Icon, PlayIcon } from "lucide-react";
+import { GithubIcon, Loader2Icon, PlayIcon, PlusIcon } from "lucide-react";
 import { use } from "react";
 import { z } from "zod";
 
@@ -69,62 +69,49 @@ export default function RepoIssueForm({
   return (
     <Form {...form}>
       <form onSubmit={handleSubmitWithAction} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="repo"
-          render={({ field: { onBlur, ref, onChange, ...field } }) => (
-            <FormItem>
-              <FormLabel>Repository</FormLabel>
-              <Select onValueChange={onChange} defaultValue={repo} {...field}>
-                <FormControl className="w-full">
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder="Select a repository"
-                      onBlur={onBlur}
-                      ref={ref}
-                    />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {installations.map((installation) =>
-                    installation.repositories.map((repo) => (
-                      <SelectItem key={repo.id} value={repo.full_name}>
-                        <GithubIcon />
-                        {repo.full_name}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* <div className="space-y-2">
-          <Label htmlFor="repository">Repository</Label>
-          <input type="hidden" name="repo" value={repo || ""} />
-          <input
-            type="hidden"
-            name="installationId"
-            value={String(installationId || "")}
+        <div className="flex w-full gap-2 items-end">
+          <FormField
+            control={form.control}
+            name="repo"
+            render={({ field: { onBlur, ref, onChange, ...field } }) => (
+              <FormItem className="flex-1">
+                <FormLabel>Repository</FormLabel>
+                <Select onValueChange={onChange} defaultValue={repo} {...field}>
+                  <FormControl className="w-full">
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder="Select a repository"
+                        onBlur={onBlur}
+                        ref={ref}
+                      />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {installations.map((installation) =>
+                      installation.repositories.map((repo) => (
+                        <SelectItem key={repo.id} value={repo.full_name}>
+                          <GithubIcon />
+                          {repo.full_name}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          <Select value={repo || ""}>
-            <SelectTrigger id="repository" className="w-full">
-              <SelectValue placeholder="Select a repository" />
-            </SelectTrigger>
-            <SelectContent>
-              {installations.map((installation) =>
-                installation.repositories.map((repo) => (
-                  <SelectItem key={repo.id} value={repo.full_name}>
-                    <GithubIcon />
-                    {repo.full_name}
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
-        </div> */}
+          <Button type="button" asChild variant="outline">
+            <a
+              href={`https://github.com/apps/${
+                process.env.NEXT_PUBLIC_GITHUB_APP_NAME || ""
+              }/installations/select_target`}
+            >
+              <PlusIcon />
+              Add account
+            </a>
+          </Button>
+        </div>
 
         <FormField
           control={form.control}
