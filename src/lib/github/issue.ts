@@ -1,4 +1,6 @@
 import {
+  addReactionToComment,
+  addReactionToIssue,
   findUserByGithubId,
   getInstallationToken,
   getIssueDetails,
@@ -26,7 +28,7 @@ export async function handleIssueCommentEvent(
 ) {
   if (!canProcessIssue(payload)) return;
   if (!payload.comment.body?.match(commandRegex)) return;
-  return await processIssueOrComment(payload);
+  return await processIssueOrComment(payload, payload.comment.id);
 }
 
 function canProcessIssue({
@@ -45,12 +47,15 @@ function canProcessIssue({
   return true;
 }
 
-export async function processIssueOrComment(payload: {
-  issue: { number: number };
-  repository: { id: number };
-  installation?: { id: number };
-  sender: { id: number };
-}) {
+export async function processIssueOrComment(
+  payload: {
+    issue: { number: number };
+    repository: { id: number };
+    installation?: { id: number };
+    sender: { id: number };
+  },
+  commentId?: number
+) {
   invariant(payload.installation);
 
   const user = await findUserByGithubId(payload.sender.id);
@@ -68,6 +73,25 @@ export async function processIssueOrComment(payload: {
     payload.installation.id
   );
   if (!repoUrl) throw new Error("Repository not found");
+
+  // Add a 👍 reaction to provide feedback that the issue/comment is being processed
+  if (commentId) {
+    // If it's a comment that triggered the processing
+    await addReactionToComment({
+      owner: issueDetails.repoOwner,
+      repo: issueDetails.repoName,
+      commentId,
+      installationId: payload.installation.id,
+    });
+  } else {
+    // If it's the issue itself that triggered the processing
+    await addReactionToIssue({
+      owner: issueDetails.repoOwner,
+      repo: issueDetails.repoName,
+      issueNumber: payload.issue.number,
+      installationId: payload.installation.id,
+    });
+  }
 
   // Create branch name from issue title
   const branchName = `issue-${payload.issue.number}-${issueDetails.issue.title
