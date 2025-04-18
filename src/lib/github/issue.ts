@@ -28,7 +28,7 @@ export async function handleIssueCommentEvent(
 ) {
   if (!canProcessIssue(payload)) return;
   if (!payload.comment.body?.match(commandRegex)) return;
-  return await processIssueOrComment(payload, payload.comment.id);
+  return await processIssueOrComment(payload);
 }
 
 function canProcessIssue({
@@ -47,15 +47,13 @@ function canProcessIssue({
   return true;
 }
 
-export async function processIssueOrComment(
-  payload: {
-    issue: { number: number };
-    repository: { id: number };
-    installation?: { id: number };
-    sender: { id: number };
-  },
-  commentId?: number
-) {
+export async function processIssueOrComment(payload: {
+  issue: { number: number };
+  repository: { id: number };
+  installation?: { id: number };
+  sender: { id: number };
+  comment?: { id: number };
+}) {
   invariant(payload.installation);
 
   const user = await findUserByGithubId(payload.sender.id);
@@ -75,13 +73,14 @@ export async function processIssueOrComment(
   if (!repoUrl) throw new Error("Repository not found");
 
   // Add a 👍 reaction to provide feedback that the issue/comment is being processed
-  if (commentId) {
+  if (payload.comment?.id) {
     // If it's a comment that triggered the processing
     await addReactionToComment({
       owner: issueDetails.repoOwner,
       repo: issueDetails.repoName,
-      commentId,
+      commentId: payload.comment.id,
       installationId: payload.installation.id,
+      reaction: "+1",
     });
   } else {
     // If it's the issue itself that triggered the processing
@@ -90,6 +89,7 @@ export async function processIssueOrComment(
       repo: issueDetails.repoName,
       issueNumber: payload.issue.number,
       installationId: payload.installation.id,
+      reaction: "+1",
     });
   }
 
