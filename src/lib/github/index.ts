@@ -174,3 +174,69 @@ export async function findRepositoryByID(repositoryId: number) {
 
   return null;
 }
+
+export async function addReactionToIssue({
+  owner,
+  repo,
+  issueNumber,
+  installationId,
+  reaction = "+1",
+}: {
+  owner: string;
+  repo: string;
+  issueNumber: number;
+  installationId: number;
+  reaction?: "+1" | "laugh" | "heart" | "hooray" | "rocket" | "eyes";
+}) {
+  try {
+    const token = await getInstallationToken(installationId);
+    const octokit = new Octokit({ auth: token });
+
+    await octokit.request(
+      "POST /repos/{owner}/{repo}/issues/{issue_number}/reactions",
+      {
+        owner,
+        repo,
+        issue_number: issueNumber,
+        content: reaction,
+      }
+    );
+    return true;
+  } catch (error) {
+    console.error(`Error adding reaction to issue:`, error);
+    return false;
+  }
+}
+
+export async function addReactionToComment({
+  owner,
+  repo,
+  commentId,
+  installationId,
+  reaction = "+1",
+}: {
+  owner: string;
+  repo: string;
+  commentId: number;
+  installationId: number;
+  reaction?: "+1" | "laugh" | "heart" | "hooray" | "rocket" | "eyes";
+}) {
+  try {
+    const token = await getInstallationToken(installationId);
+    const octokit = new Octokit({ auth: token });
+
+    await octokit.request(
+      "POST /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions",
+      {
+        owner,
+        repo,
+        comment_id: commentId,
+        content: reaction,
+      }
+    );
+    return true;
+  } catch (error) {
+    console.error(`Error adding reaction to comment:`, error);
+    return false;
+  }
+}

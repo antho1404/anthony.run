@@ -1,4 +1,6 @@
 import {
+  addReactionToComment,
+  addReactionToIssue,
   findUserByGithubId,
   getInstallationToken,
   getIssueDetails,
@@ -50,6 +52,7 @@ export async function processIssueOrComment(payload: {
   repository: { id: number };
   installation?: { id: number };
   sender: { id: number };
+  comment?: { id: number };
 }) {
   invariant(payload.installation);
 
@@ -68,6 +71,27 @@ export async function processIssueOrComment(payload: {
     payload.installation.id
   );
   if (!repoUrl) throw new Error("Repository not found");
+
+  // Add a 👍 reaction to provide feedback that the issue/comment is being processed
+  if (payload.comment?.id) {
+    // If it's a comment that triggered the processing
+    await addReactionToComment({
+      owner: issueDetails.repoOwner,
+      repo: issueDetails.repoName,
+      commentId: payload.comment.id,
+      installationId: payload.installation.id,
+      reaction: "+1",
+    });
+  } else {
+    // If it's the issue itself that triggered the processing
+    await addReactionToIssue({
+      owner: issueDetails.repoOwner,
+      repo: issueDetails.repoName,
+      issueNumber: payload.issue.number,
+      installationId: payload.installation.id,
+      reaction: "+1",
+    });
+  }
 
   // Create branch name from issue title
   const branchName = `issue-${payload.issue.number}-${issueDetails.issue.title
