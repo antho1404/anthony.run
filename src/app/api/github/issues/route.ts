@@ -1,5 +1,4 @@
-import { getAccountRepositoriesByInstallationIds } from "@/lib/github";
-import { getRepoIssues } from "@/lib/github/issue";
+import { listIssues } from "@/lib/github";
 import { currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -16,22 +15,6 @@ export async function GET(req: NextRequest) {
       { status: 400 }
     );
 
-  const installations = await getAccountRepositoriesByInstallationIds(
-    user?.privateMetadata.githubInstallationIds || []
-  );
-  const installation = installations.find((i) =>
-    i.repositories.find((r) => r.full_name === repoFullName)
-  );
-
-  if (!installation)
-    return NextResponse.json(
-      { error: "Installation not found" },
-      { status: 404 }
-    );
-
-  const issues = await getRepoIssues({
-    installationId: installation.installationId,
-    repoFullName,
-  });
+  const issues = await listIssues(user.id, repoFullName);
   return NextResponse.json({ issues });
 }

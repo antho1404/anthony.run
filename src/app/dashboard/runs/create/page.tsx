@@ -1,7 +1,8 @@
 import RepoIssueSelector from "@/components/repo-issue-form";
-import { getAccountRepositoriesByInstallationIds } from "@/lib/github";
+import { listRepositories } from "@/lib/github";
 import { currentUser } from "@clerk/nextjs/server";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Create run • anthony • run",
@@ -10,9 +11,8 @@ export const metadata: Metadata = {
 
 export default async function CreateRunPage() {
   const user = await currentUser();
-  const installations = getAccountRepositoriesByInstallationIds(
-    user?.privateMetadata.githubInstallationIds || []
-  );
+  if (!user) notFound();
+  const repoPromise = listRepositories(user.id);
 
-  return <RepoIssueSelector installationsPromise={installations} />;
+  return <RepoIssueSelector repoPromise={repoPromise} />;
 }
