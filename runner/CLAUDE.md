@@ -25,8 +25,12 @@
 - Avoid prop drilling with context when appropriate
 
 ## Linting and Formatting
-- Always run `npm run lint` to verify code quality before committing changes
-- Follow Next.js ESLint core web vitals and TypeScript configuration
+- The runner automatically detects and runs available linters in the repository
+- Supported linting tools include:
+  - Project-specific lint commands (npm run lint)
+  - ESLint (via configuration files)
+  - Prettier (via configuration files)
+- Follow the repository's coding standards and linting rules
 - Use proper TypeScript types and avoid type errors
 - Maintain consistent indentation and spacing
 - Avoid eslint warnings and errors by adhering to project conventions

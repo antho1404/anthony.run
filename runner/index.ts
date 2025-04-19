@@ -1,6 +1,66 @@
 import { execSync } from "child_process";
-import { mkdtempSync, rmSync } from "fs";
+import { existsSync, mkdtempSync, rmSync } from "fs";
 import { tmpdir } from "os";
+
+function detectLintCommand(repoPath: string): string | null {
+  try {
+    // Check for package.json and if it contains lint commands
+    if (existsSync(`${repoPath}/package.json`)) {
+      const packageJson = JSON.parse(
+        execSync(`cat ${repoPath}/package.json`, { stdio: "pipe" }).toString()
+      );
+      
+      if (packageJson.scripts && packageJson.scripts.lint) {
+        return "npm run lint";
+      }
+    }
+
+    // Check for common linting configs
+    if (
+      existsSync(`${repoPath}/.eslintrc`) ||
+      existsSync(`${repoPath}/.eslintrc.js`) ||
+      existsSync(`${repoPath}/.eslintrc.json`) ||
+      existsSync(`${repoPath}/eslint.config.js`) ||
+      existsSync(`${repoPath}/eslint.config.mjs`)
+    ) {
+      return "npx eslint . --fix";
+    }
+
+    // Check for prettier config
+    if (
+      existsSync(`${repoPath}/.prettierrc`) ||
+      existsSync(`${repoPath}/.prettierrc.js`) ||
+      existsSync(`${repoPath}/.prettierrc.json`)
+    ) {
+      return "npx prettier --write .";
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error detecting lint command:", error);
+    return null;
+  }
+}
+
+function runLinter(lintCommand: string): void {
+  try {
+    console.log(`Running linter: ${lintCommand}`);
+    execSync(lintCommand, { stdio: "inherit" });
+    
+    // Check if there are any changes after linting
+    const hasChanges = execSync("git status --porcelain", { 
+      stdio: "pipe" 
+    }).toString().trim().length > 0;
+    
+    if (hasChanges) {
+      console.log("Committing linting changes...");
+      execSync("git add .", { stdio: "inherit" });
+      execSync('git commit -m "Apply linting fixes"', { stdio: "inherit" });
+    }
+  } catch (error) {
+    console.error("Linting failed, but continuing with the process:", error);
+  }
+}
 
 async function main({
   repoUrl,
@@ -32,6 +92,14 @@ async function main({
     );
 
     const output = JSON.parse(stdio.toString());
+
+    // Detect and run linter after code changes
+    const lintCommand = detectLintCommand(tmpDir);
+    if (lintCommand) {
+      runLinter(lintCommand);
+    } else {
+      console.log("No linter configuration detected in the repository");
+    }
 
     console.log("Pushing changes to GitHub...");
     execSync(`git push origin ${branch}`, { stdio: "inherit" });
