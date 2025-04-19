@@ -25,7 +25,11 @@
 - Avoid prop drilling with context when appropriate
 
 ## Linting and Formatting
-- Always run `npm run lint` to verify code quality before committing changes
+- IMPORTANT: YOU MUST run `npm run lint` to verify code quality BEFORE committing any changes
+- If the project has other linting commands (like `npm run typecheck`), run those as well
+- Check for the existence of linting commands in package.json and run ALL that are available
+- If linting fails, fix the issues before committing
+- If the project doesn't have linting commands, notify the user in your PR description
 - Follow Next.js ESLint core web vitals and TypeScript configuration
 - Use proper TypeScript types and avoid type errors
 - Maintain consistent indentation and spacing
@@ -77,6 +81,10 @@
 - Document architecture decisions
 
 ## GitHub Workflow Best Practices
+- CRITICAL: Always run linting before committing changes
+- Detect available lint commands in package.json and run ALL of them
+- Fix any linting errors before creating a commit
+- If linting fails but you cannot fix some issues, document them in the PR description
 - Write clear, descriptive commit messages
 - Create focused pull requests with single responsibility
 - Include detailed PR descriptions explaining changes
