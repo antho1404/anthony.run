@@ -25,18 +25,11 @@ import { use } from "react";
 import { z } from "zod";
 
 interface RepoIssueFormProps {
-  installationsPromise: Promise<
-    {
-      installationId: number;
-      repositories: { id: number; full_name: string }[];
-    }[]
-  >;
+  repoPromise: Promise<{ id: number; full_name: string }[]>;
 }
 
-export default function RepoIssueForm({
-  installationsPromise,
-}: RepoIssueFormProps) {
-  const installations = use(installationsPromise);
+export default function RepoIssueForm({ repoPromise }: RepoIssueFormProps) {
+  const repos = use(repoPromise);
 
   const { form, handleSubmitWithAction } = useHookFormAction(
     createRunAction,
@@ -87,14 +80,12 @@ export default function RepoIssueForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {installations.map((installation) =>
-                      installation.repositories.map((repo) => (
-                        <SelectItem key={repo.id} value={repo.full_name}>
-                          <GithubIcon />
-                          {repo.full_name}
-                        </SelectItem>
-                      ))
-                    )}
+                    {repos.map((repo) => (
+                      <SelectItem key={repo.id} value={repo.full_name}>
+                        <GithubIcon />
+                        {repo.full_name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -154,8 +145,16 @@ export default function RepoIssueForm({
           )}
         />
 
-        <Button className="w-full" type="submit">
-          <PlayIcon />
+        <Button
+          className="w-full"
+          type="submit"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? (
+            <Loader2Icon className="size-4 animate-spin" />
+          ) : (
+            <PlayIcon />
+          )}
           Create Run
         </Button>
       </form>

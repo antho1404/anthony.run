@@ -5,10 +5,9 @@ import { components } from "@octokit/openapi-types";
 export function generatePromptFromIssue(
   issue: components["schemas"]["issue"],
   comments: components["schemas"]["issue-comment"][],
-  repoFullName: string,
-  repoOwner: string,
-  repoName: string
+  repoFullName: string
 ): string {
+  const [owner, name] = repoFullName.split("/");
   const keywords = extractKeywords(issue.body || "");
 
   return `
@@ -61,8 +60,8 @@ Please solve this issue by implementing the necessary changes to the codebase. F
 
 ## Repository Context
 
-- Owner: ${repoOwner}
-- Repository: ${repoName}
+- Owner: ${owner}
+- Repository: ${name}
 - Issue URL: https://github.com/${repoFullName}/issues/${issue.number}
 
 ## Focus Areas

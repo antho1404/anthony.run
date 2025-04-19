@@ -1,4 +1,3 @@
-import { handleInstallationEvent } from "@/lib/github/installation";
 import { handleIssueCommentEvent, handleIssueEvent } from "@/lib/github/issue";
 import { webhooks as webhooksType } from "@octokit/openapi-webhooks-types";
 import { Webhooks } from "@octokit/webhooks";
@@ -24,13 +23,6 @@ export async function POST(req: NextRequest) {
   const event = headersPayload.get("x-github-event");
 
   try {
-    if (event === "installation")
-      await handleInstallationEvent(
-        JSON.parse(rawBody) as Event<
-          "installation-created" | "installation-deleted"
-        >
-      );
-
     if (
       event === "issues" ||
       event === "issues-opened" ||
